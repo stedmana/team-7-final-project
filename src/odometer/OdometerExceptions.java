@@ -1,4 +1,4 @@
-package ca.mcgill.ecse211.odometer;
+package odometer;
 
 /**
  * This class is used to handle errors regarding the singleton pattern used for the odometer and

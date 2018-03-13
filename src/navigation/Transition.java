@@ -1,4 +1,4 @@
-package tasks;
+package navigation;
 
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import ca.mcgill.ecse211.odometer.OdometryCorrection;

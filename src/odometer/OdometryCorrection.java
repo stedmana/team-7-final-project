@@ -1,7 +1,7 @@
 /*
  * OdometryCorrection.java
  */
-package ca.mcgill.ecse211.odometer;
+package odometer;
 
 import lejos.hardware.port.Port;
 import java.util.Arrays;

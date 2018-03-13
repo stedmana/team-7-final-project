@@ -1,6 +1,6 @@
-package tasks;
-import ca.mcgill.ecse211.odometer.Odometer;
-import ca.mcgill.ecse211.odometer.OdometerExceptions;
+package navigation;
+import odometer.Odometer;
+import odometer.OdometerExceptions;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.robotics.SampleProvider;
 
