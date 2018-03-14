@@ -4,6 +4,7 @@ import odometer.OdometerExceptions;
 import lejos.hardware.Sound;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.robotics.SampleProvider;
+import main.Params;
 
 public class Navigate {
 	
@@ -16,29 +17,27 @@ public class Navigate {
 	private static EV3LargeRegulatedMotor rightMotor;
 	private static double radius;
 	private static double track;
-	private static int corner;
 	
 	private static Odometer odo;
 
 	private static SampleProvider leftLightVal;
 	private static SampleProvider rightLightVal;
+	
 	/**
-	 * 
+	 * Navigate class used for navigation
 	 * @param leftMotor
 	 * @param rightMotor
-	 * @param radius
-	 * @param track
-	 * @param colorL
-	 * @param colorR
+	 * @param leftLightVal
+	 * @param rightLightVal
 	 * @throws OdometerExceptions
 	 */
 	public Navigate(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor,
-			double radius, double track, SampleProvider leftLightVal, SampleProvider rightLightVal) throws OdometerExceptions {
+			SampleProvider leftLightVal, SampleProvider rightLightVal) throws OdometerExceptions {
 		
 		
-		this.track = track;
+		this.track = Params.TRACK;
 		
-		this.radius = radius;
+		this.radius = Params.WHEEL_RAD;
 		
 		this.leftMotor = leftMotor;
 		this.rightMotor = rightMotor;
@@ -54,38 +53,15 @@ public class Navigate {
 	 * Travels to point given in arguments by referencing odometer value
 	 * Correction occurs along the way using two front mounted light sensors
 	 * Assuming: on an intersection of two grid lines
-	 * @param x
-	 * @param y
+	 * @param x - in cartesian coordinates
+	 * @param y - in cartesian coordinates
 	 * @param pointCorrect - does odometry correction about end point if true
 	 * @return
 	 */
 	public static void travelTo(double x, double y, boolean pointCorrect) {
 		
-<<<<<<< HEAD
+
 		//get current position from odometer
-=======
-	public void run() {
-	  // Update to make this better - John.
-		double x, y;
-		//assuming 
-	if(corner == 1) { //starting in green zone; bridge first
-		odo.setXYT(10.501968, 0.817585, 0);
-		 x = 4.5;
-		 y = 5;
-	} else { //starting in red zone; tunnel first
-		odo.setXYT(1.501968, 10.817585, 180);
-		 x = 7.5;
-		 y = 7;
-	} 
-	}
-	
-	
-	public static int travelTo(double x, double y) {
-
-		double distance = 0;
-		int val = 0;
-
->>>>>>> 38bf1612f56f2b2c66961730d02ab135b5450a46
 		double[] pos = odo.getXYT();
 		
 		//
@@ -235,8 +211,8 @@ public class Navigate {
 	}
 	
 	/**
-	 * 
-	 * @param theta
+	 * Turns the robot the minimum distance to face the desired theta heading
+	 * @param theta - in degrees
 	 */
 	public static void turnTo(double theta) {
 
@@ -256,14 +232,5 @@ public class Navigate {
 		   double rotationAngle = dTheta * (track/(2*radius));
 		   leftMotor.rotate((int) rotationAngle, true);
 		   rightMotor.rotate((int) -rotationAngle, false);
-	}
-	
-	private static int convertDistance(double radius, double distance) {
-		return (int) ((180.0 * distance) / (Math.PI * radius));
-	}
-
-	private static int convertAngle(double radius, double width, double angle) {
-		return convertDistance(radius, Math.PI * width * angle / 360.0);
-	}
-	
+	}	
 }
