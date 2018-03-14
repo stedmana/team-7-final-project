@@ -51,10 +51,20 @@ public class TaskManager {
          return tm;
      }
      
+     /**
+      * registerTask Register a Task object to perform one of the TaskTypes
+      * @param taskID TaskType corresponding to the Task
+      * @param t Task object specifying the actions to perform
+      * @param allotedTime Time allowed for the task, only used for premptimble tasks
+      */
      public void registerTask(TaskType taskID, Task t, long allotedTime) {
          idMap.put(taskID, new TaskInfo(t, allotedTime));
      }
      
+     /**
+      * calculateTaskOrder Calculate the mapping of tasks based on our team color
+      * @param teamID TEAM_GREEN or TEAM_ORANGE corresponding to the team.
+      */
      public void calculateTaskOrder(int teamID) {
          taskMap.put(NONE, INIT);
          taskMap.put(INIT, LOCALIZE);
@@ -63,7 +73,7 @@ public class TaskManager {
              taskMap.put(NAV_TO_TUNNEL, SEARCH);
              taskMap.put(SEARCH, NAV_TO_BRIDGE);
              taskMap.put(NAV_TO_BRIDGE, NAV_TO_HOME);
-         }else {
+         }else if(teamID == TEAM_GREEN) {
              taskMap.put(LOCALIZE, NAV_TO_BRIDGE);
              taskMap.put(NAV_TO_BRIDGE, SEARCH);
              taskMap.put(SEARCH, NAV_TO_TUNNEL);
@@ -71,6 +81,10 @@ public class TaskManager {
          }
      }
      
+     /**
+      * onTimeCallback prempts the running task.
+      * @param taskID task to check for out of time.
+      */
      public synchronized void onTimerCallback(TaskType taskID) {
          TaskInfo ti = idMap.get(taskID);
          if(!ti.finished) {
@@ -79,12 +93,19 @@ public class TaskManager {
          }
      }
      
+     /**
+      * Allows placing a custom task map other than the full competition one calculated using team ID
+      * @param taskTypes List of tasktypes, according to how to set the tasks.
+      */
      public void setDebugTaskOrder(TaskType...taskTypes) {
          taskMap.put(NONE, taskTypes[0]);
          for(int i = 1; i < taskTypes.length; i++)
              taskMap.put(taskTypes[i-1], taskTypes[i]);
      }
      
+     /**
+      * Starts the task_runner, this method will not return until all the tasks are complete.
+      */
      public void start() {
          while(true) {
              final boolean prevTaskSuccess;
@@ -117,6 +138,12 @@ public class TaskManager {
          }         
      }
 
+    /**
+     * getNextTask: called when the state machine finishes a task is proceeding to another task.
+     * @param taskID TaskType of the current task to be switched out of
+     * @param prevTaskSuccess Indicates the success of the current task
+     * @return new TaskType which will be the next task that is run.
+     */
     private TaskType getNextTask(TaskType taskID, boolean prevTaskSuccess) {
         // If there are multiple paths a task can take then put that logic here..
         if(taskMap.containsKey(taskID))

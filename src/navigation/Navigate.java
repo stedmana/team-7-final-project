@@ -61,7 +61,31 @@ public class Navigate {
 	 */
 	public static void travelTo(double x, double y, boolean pointCorrect) {
 		
+<<<<<<< HEAD
 		//get current position from odometer
+=======
+	public void run() {
+	  // Update to make this better - John.
+		double x, y;
+		//assuming 
+	if(corner == 1) { //starting in green zone; bridge first
+		odo.setXYT(10.501968, 0.817585, 0);
+		 x = 4.5;
+		 y = 5;
+	} else { //starting in red zone; tunnel first
+		odo.setXYT(1.501968, 10.817585, 180);
+		 x = 7.5;
+		 y = 7;
+	} 
+	}
+	
+	
+	public static int travelTo(double x, double y) {
+
+		double distance = 0;
+		int val = 0;
+
+>>>>>>> 38bf1612f56f2b2c66961730d02ab135b5450a46
 		double[] pos = odo.getXYT();
 		
 		//
