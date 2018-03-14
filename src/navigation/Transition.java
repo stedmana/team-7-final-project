@@ -1,9 +1,9 @@
 package navigation;
 
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
-import ca.mcgill.ecse211.odometer.OdometryCorrection;
-import ca.mcgill.ecse211.odometer.OdometerExceptions;
-import ca.mcgill.ecse211.odometer.Odometer;
+import odometer.OdometryCorrection;
+import odometer.OdometerExceptions;
+import odometer.Odometer;
 
 public class Transition extends OdometryCorrection{
 	

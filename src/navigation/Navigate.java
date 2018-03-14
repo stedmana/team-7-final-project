@@ -44,6 +44,7 @@ public class Navigate {
 	
 		
 	public void run() {
+	  // Update to make this better - John.
 		double x, y;
 		//assuming 
 	if(corner == 1) { //starting in green zone; bridge first
