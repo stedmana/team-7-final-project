@@ -1,13 +1,12 @@
 package navigation;
 import odometer.Odometer;
 import odometer.OdometerExceptions;
+import lejos.hardware.Sound;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.robotics.SampleProvider;
 
 public class Navigate {
 	
-	private double xPos;
-	private double yPos;
 	
 	private static final int FORWARD_SPEED = 250;
 	private static final int ROTATE_SPEED = 150;
@@ -21,28 +20,50 @@ public class Navigate {
 	
 	private static Odometer odo;
 
-	private static SampleProvider colorL;
-	private static SampleProvider colorR;
-
-	public Navigate(int corner, EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor,
-			double radius, double track, SampleProvider colorL, SampleProvider colorR) throws OdometerExceptions {
-		this.colorL = colorL;
-		this.colorR = colorR;
+	private static SampleProvider leftLightVal;
+	private static SampleProvider rightLightVal;
+	/**
+	 * 
+	 * @param leftMotor
+	 * @param rightMotor
+	 * @param radius
+	 * @param track
+	 * @param colorL
+	 * @param colorR
+	 * @throws OdometerExceptions
+	 */
+	public Navigate(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor,
+			double radius, double track, SampleProvider leftLightVal, SampleProvider rightLightVal) throws OdometerExceptions {
+		
 		
 		this.track = track;
+		
+		this.radius = radius;
 		
 		this.leftMotor = leftMotor;
 		this.rightMotor = rightMotor;
 		
+		this.leftLightVal = leftLightVal;
+		this.rightLightVal = rightLightVal;
+		
 		odo = Odometer.getOdometer();
 		
-		xPos = odo.getXYT()[0];
-		yPos = odo.getXYT()[1];
-		
-		this.corner = corner;
 	}
 	
+	/**
+	 * Travels to point given in arguments by referencing odometer value
+	 * Correction occurs along the way using two front mounted light sensors
+	 * Assuming: on an intersection of two grid lines
+	 * @param x
+	 * @param y
+	 * @param pointCorrect - does odometry correction about end point if true
+	 * @return
+	 */
+	public static void travelTo(double x, double y, boolean pointCorrect) {
 		
+<<<<<<< HEAD
+		//get current position from odometer
+=======
 	public void run() {
 	  // Update to make this better - John.
 		double x, y;
@@ -64,50 +85,177 @@ public class Navigate {
 		double distance = 0;
 		int val = 0;
 
+>>>>>>> 38bf1612f56f2b2c66961730d02ab135b5450a46
 		double[] pos = odo.getXYT();
-		distance = Math.sqrt(Math.pow(x * TILE_SIZE - pos[0], 2) + Math.pow(y * TILE_SIZE - pos[1], 2));
-
-		double angle = Math.atan2(x * TILE_SIZE - pos[0], y * TILE_SIZE - pos[1]) * 180 / Math.PI;
-		angle = (angle < 0) ? 360 + angle : angle;
-
-		if ((angle - pos[2] < 0 ? 360 + angle - pos[2] : angle - pos[2]) > 5) {
-			turnTo(angle);
-		}
-
-
-		leftMotor.setSpeed(FORWARD_SPEED);
-		rightMotor.setSpeed(FORWARD_SPEED);
-
-		leftMotor.rotate(convertDistance(radius, distance), true);
-		rightMotor.rotate(convertDistance(radius, distance), false);
 		
-		if((odo.getXYT()[0] >= (4.5 - 0.5)) && (odo.getXYT()[0]) <= (4.5 + 0.5)) { //bridge - return 1 for transit (bridge)
-			val = 1;
+		//
+		x = x*Navigate.TILE_SIZE;
+		y = y*Navigate.TILE_SIZE;
+		
+		
+		//get sample arrays for front facing light sensors
+		float[] sampleLeft = new float[leftLightVal.sampleSize()];
+        float [] sampleRight = new float[rightLightVal.sampleSize()];
+        
+        //booleans to be used by 
+        boolean leftDetect = false;
+        boolean rightDetect = false;
+		
+		//rotate to begin y rotation
+		if(y - pos[1] > 0)
+			turnTo(0);
+		else
+			turnTo(180);
+		
+		//travel y distance
+		while(Math.abs(y - pos[1]) > 1){ //while distance difference is greater than 1cm
+			
+			rightLightVal.fetchSample(sampleRight, 0);
+            leftLightVal.fetchSample(sampleLeft, 0);
+            
+            //TODO: make black line detection more rigorous using differential filtering
+            
+            //dynamic theta correction takes place with left and right wheel line detection
+            if(sampleLeft[0] < 0.4)
+            {
+              leftMotor.stop(true);
+              Sound.beep();
+              leftDetect = true;
+              
+            }
+            if(sampleRight[0] < 0.4)
+            {
+	          rightMotor.stop(true);
+	          Sound.beep();
+	          rightDetect = true;
+            }
+            //resets once line is hit
+            if(leftDetect && rightDetect) {
+            	leftDetect = rightDetect = false;
+            	rightMotor.forward();
+            	leftMotor.forward();
+            }
+			
 		}
 		
-		if((odo.getXYT()[0] >= (7.5 - 0.5)) && (odo.getXYT()[0]) <= (7.5 + 0.5)) { //tunnel - return 2 for transit (tunnel)
-			val = 2;
+		//y coordinate has been reached
+		leftMotor.stop();
+		rightMotor.stop();
+		
+		//turn towards x coordinate
+		if(x - pos[0] > 0)
+			turnTo(90);
+		else
+			turnTo(270);
+		
+		//execute similar loop traveling to x coordinate
+		while(Math.abs(x - pos[0]) > 1){ //while distance difference is greater than 1cm
+			
+			rightLightVal.fetchSample(sampleRight, 0);
+            leftLightVal.fetchSample(sampleLeft, 0);
+            
+            //TODO: make black line detection more rigorous using differential filtering
+            
+            //dynamic theta correction takes place with left and right wheel line detection
+            if(sampleLeft[0] < 0.4)
+            {
+              leftMotor.stop(true);
+              Sound.beep();
+              leftDetect = true;
+              
+            }
+            if(sampleRight[0] < 0.4)
+            {
+	          rightMotor.stop(true);
+	          Sound.beep();
+	          rightDetect = true;
+            }
+            //resets once line is hit
+            if(leftDetect && rightDetect) {
+            	leftDetect = rightDetect = false;
+            	rightMotor.forward();
+            	leftMotor.forward();
+            }
+			
 		}
-		return val;
+		
+		//the x coordinate has been reached
+		rightMotor.stop();
+		leftMotor.stop();
+		
+		
+		//TODO: add logic to correct odometer about finishing point
+
+		
 		
 	}
 	
+	/**
+	 * Allows robot to correct theta by driving forward to nearest black line
+	 * and using it to square the theta to that line
+	 */
+	public static void squareUp()
+	{
+		//get samples
+		float[] sampleLeft = new float[leftLightVal.sampleSize()];
+        float [] sampleRight = new float[rightLightVal.sampleSize()];
+        
+        
+        //set speed
+        leftMotor.setSpeed(100);
+        rightMotor.setSpeed(100);
+        
+        boolean leftDetect = true;
+        boolean rightDetect = true;
+        
+        //drive forward
+        leftMotor.forward();
+        rightMotor.forward();
+        
+        //drive to next line
+        do {    
+            rightLightVal.fetchSample(sampleRight, 0);
+            leftLightVal.fetchSample(sampleLeft, 0);
+            
+            //TODO: make black line detection more rigorous using differential filtering
+            
+            if(sampleLeft[0] < 0.4)
+            {
+              leftMotor.stop(true);
+              Sound.beep();
+              leftDetect = false;
+              
+            }
+            if(sampleRight[0] < 0.4)
+            {
+	          rightMotor.stop(true);
+	          rightDetect = false;
+            }
+        }while(leftDetect || rightDetect);
+	}
+	
+	/**
+	 * 
+	 * @param theta
+	 */
 	public static void turnTo(double theta) {
 
-		double rotation = theta - odo.getXYT()[2];
-		rotation = (rotation < 0) ? 360 + rotation : rotation;
-
-		leftMotor.setSpeed(ROTATE_SPEED);
-		rightMotor.setSpeed(ROTATE_SPEED);
-
-		if (rotation < 180) {
-			leftMotor.rotate(convertAngle(radius, track, rotation), true);
-			rightMotor.rotate(-convertAngle(radius, track, rotation), false);
-		} else {
-			leftMotor.rotate(-convertAngle(radius, track, 360 - rotation), true);
-			rightMotor.rotate(convertAngle(radius, track, 360 - rotation), false);
-		}
-
+		double dTheta = theta - odo.getXYT()[2];
+		   
+		   //Insures rotation magnitude will be less than 180
+		   //by normalizing angle about +-180
+		   if(dTheta > 180) {
+		     dTheta -= 360;
+		   }
+		   else if(dTheta < -180)
+		   {
+		     dTheta += 360;
+		   }
+		   
+		   //Rotates robot
+		   double rotationAngle = dTheta * (track/(2*radius));
+		   leftMotor.rotate((int) rotationAngle, true);
+		   rightMotor.rotate((int) -rotationAngle, false);
 	}
 	
 	private static int convertDistance(double radius, double distance) {
