@@ -22,8 +22,9 @@ public class Localization implements Task{
      * @param rightMotor right motor object.
      */
     public Localization(final SampleProvider sensor, 
-                          final EV3LargeRegulatedMotor leftMotor,
-                          final EV3LargeRegulatedMotor rightMotor)
+                        final EV3LargeRegulatedMotor leftMotor,
+                        final EV3LargeRegulatedMotor rightMotor,
+                        public int corner)
     {
         this.us = sensor;
         this.leftMotor = leftMotor;
@@ -35,6 +36,7 @@ public class Localization implements Task{
           e.printStackTrace();
         }
         this.odometer = tmpOdom;
+        
     }
 
     @Override
@@ -52,6 +54,7 @@ public class Localization implements Task{
         }while(Math.abs(lastReading-currentReading) > 20);
         Navigate.turnTo((lastReading+currentReading)/2);
         Navigate.squareUp();
+        
         return success;
     }
 
