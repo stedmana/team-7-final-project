@@ -13,15 +13,13 @@ public class Params {
 	public static int SPEED = 0; // deg/sec
 	public static int ACCEL = 0; // deg/sec/sec
 	public static double TILE_LENGTH = 30.48; // cm
-	
-	
-
+	public static int TEAM_ID = 7;
 	// Corner location  parameters
 	public final static double cornerParams[][] = {
-			{    TILE_LENGTH,     TILE_LENGTH,  0},
-			{11 * TILE_LENGTH,     TILE_LENGTH,   270},
-			{11 * TILE_LENGTH, 11 * TILE_LENGTH, 180},
-			{    TILE_LENGTH, 11 * TILE_LENGTH, 90}
+			{    TILE_LENGTH,     TILE_LENGTH,  90},
+			{7 * TILE_LENGTH,     TILE_LENGTH,   0},
+			{7 * TILE_LENGTH, 7 * TILE_LENGTH, 270},
+			{    TILE_LENGTH, 7 * TILE_LENGTH, 180}
 	};
 =======
     /*
