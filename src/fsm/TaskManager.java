@@ -30,8 +30,8 @@ public class TaskManager {
         SEARCH
      };
      
-     private static final int TEAM_ORANGE = 0;
-     private static final int TEAM_GREEN = 1;
+     public static final int TEAM_RED = 0;
+     public static final int TEAM_GREEN = 1;
      
      static TaskManager tm;
      
@@ -68,7 +68,7 @@ public class TaskManager {
      public void calculateTaskOrder(int teamID) {
          taskMap.put(NONE, INIT);
          taskMap.put(INIT, LOCALIZE);
-         if(teamID == TEAM_ORANGE){
+         if(teamID == TEAM_RED){
              taskMap.put(LOCALIZE, NAV_TO_TUNNEL);
              taskMap.put(NAV_TO_TUNNEL, SEARCH);
              taskMap.put(SEARCH, NAV_TO_BRIDGE);
