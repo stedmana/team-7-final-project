@@ -26,11 +26,7 @@ public class Main {
   public static void main(String[] args) {
     Map<String, Integer> debugParams = new HashMap<String,Integer>();
     debugParams.put("RedCorner", 0);
-<<<<<<< HEAD
-    Task iTask = new InitTask("192.168.2.11", 1, debugParams, false);
-=======
     Task iTask = new InitTask("192.168.2.32", Params.TEAM_ID, debugParams, true);
->>>>>>> ADD DEBUG MENU
     
     TaskManager t = TaskManager.get();
     getKillThread().start();
