@@ -1,6 +1,7 @@
 package tasks;
-import tasks.Navigate;
-import ca.mcgill.ecse211.odometer.*;
+import navigation.Navigate;
+import odometer.*;
+import lejos.hardware.Sound;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.robotics.SampleProvider;
 import java.util.ArrayList;
@@ -17,9 +18,7 @@ public class Search {
 	
 	public boolean outOfTime; 
 	
-	private static float[] blocks = new float[8]; //can hold 30 position values
-	ArrayList<Float> block = new ArrayList<Float>();
-	
+	private static float[] blocks = new float[8]; //can hold 4 position values	
 	private static EV3LargeRegulatedMotor leftMotor;
 	private static EV3LargeRegulatedMotor rightMotor;
 	
@@ -35,9 +34,33 @@ public class Search {
 	
 	int colour;
 
+	int targetColour;
+	
+	/**
+	 * Creates the search class, which enables the robot to createa 2-d map of the search area,
+	 * with all blocks included within it
+	 * @param ultraSonic - the ultrasonic sensor
+	 * 
+	 * @param odo - the odometer object
+	 * 
+	 * @param nav - the navigation object
+	 * 
+	 * @param llx - x position on the grid of the lower left corner of the search area
+	 * @param lly - y position on the grid of the lower left corner of the search area
+	 * 
+	 * @param urx - x position on the grid of the upper right corner of the search area
+	 * @param ury - y position on the grid of the upper right corner of the search area
+	 * 
+	 * @param leftMotor - the left EV3 motor
+	 * @param rightMotor - the right EV3 motor
+	 * 
+	 * @param col - a colour detection object from the detectColour package
+	 * @param targetColour - a number between 1 and 4, representing the
+	 *  colour of the object (blue = 1, red = 2, yellow = 3, white = 4)
+	 * */
 	
 	public Search(SampleProvider ultraSonic, Odometer odo, Navigate nav, double llx, double lly, double urx, double ury,
-			EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, DetectColor col) {
+			EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, DetectColor col, int targetColour) {
 		
 		
 		this.llx = llx;
@@ -61,25 +84,20 @@ public class Search {
 		colour = 0;
 		
 		outOfTime = false;
+		
+		this.targetColour = targetColour;
 			
 	}
 	
+	
+	/**
+	 *Enables the robot to travel to each corner of the search area,
+	 *and then probe for blocks afterwards */
 	public void run() {
 	float data[] = new float[ultraSonic.sampleSize()];
 	int i = 0;
 		
-//		int numTurns;
-//		
-//		if(yDiff == 1) {}
-//		else {
-//			for(int i = 1; i < yDiff; i++) {
-//				if(yDiff % i == 0) {
-//					numTurns = i;
-//				}
-//			}
-//		}
-		
-		nav.travelToBlock(urx, odo.getXYT()[1]);
+		nav.travelTo(urx, odo.getXYT()[1], true);
 		while(leftMotor.isMoving() && rightMotor.isMoving()) {
 			ultraSonic.fetchSample(data, 0);
 			if(data[0] <= 80) {
@@ -91,7 +109,7 @@ public class Search {
 			}
 		}
 		
-		nav.travelToBlock(odo.getXYT()[0], ury);
+		nav.travelTo(odo.getXYT()[0], ury, true);
 		while(leftMotor.isMoving() && rightMotor.isMoving()) {
 			ultraSonic.fetchSample(data, 0);
 			if(data[0] <= 80) { //maybe lower the max distance before disregarding distance
@@ -101,7 +119,7 @@ public class Search {
 			}
 		}
 		
-		nav.travelToBlock(llx, odo.getXYT()[2]);
+		nav.travelTo(llx, odo.getXYT()[2], true);
 		while(leftMotor.isMoving() && rightMotor.isMoving()) {
 			ultraSonic.fetchSample(data, 0);
 			if(data[0] <= 80) { //maybe lower the max distance before disregarding distance
@@ -111,7 +129,7 @@ public class Search {
 			}
 		}
 		
-		nav.travelToBlock(odo.getXYT()[0], lly);
+		nav.travelTo(odo.getXYT()[0], lly, true);
 		while(leftMotor.isMoving() && rightMotor.isMoving()) {
 			ultraSonic.fetchSample(data, 0);
 			if(data[0] <= 80) { //maybe lower the max distance before disregarding distance
@@ -121,11 +139,15 @@ public class Search {
 			}
 		}
 		
-		
-		probe();
+		probe(targetColour);
 	}
 	
-	public void probe(/*double depthMax*/) { //have color detection running in the background
+	
+	/*
+	 * Drives to each object saved in the 2-d map, in order to identify colour
+	 * @param targetColour - an int corresponding to a blue, red, yellow or white block
+	 * */
+	public void probe(int targetColour) { //have color detection running in the background
 		
 		float data[] = new float[ultraSonic.sampleSize()];
 		
@@ -133,37 +155,28 @@ public class Search {
 			if(blocks[i] == 0 && blocks[i+1] == 0) { //the only way both values will be 0 is if there are no more blocks recorded
 				break; //or return..??
 			}
-			nav.travelToBlock((double)blocks[i], (double)blocks[i+1]);
+			nav.travelTo((double)blocks[i], (double)blocks[i+1], false);
 			//insert colour detection here!!!
 			while(leftMotor.isMoving() && rightMotor.isMoving()) {
 				ultraSonic.fetchSample(data, 0);
-				if(data[0] <= 15) {
+				if(data[0] <= 15) { //do we have an ultrasonic sensor to detect the block?
 					colour = col.detectC();
+					try {
+						Thread.sleep(500); //to allow the colour detection to be accurate
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				colour = col.detectC();
+				break;
 				}
+			} if(colour == targetColour) {
+				Sound.beep();
+				Sound.beep();
+				Sound.beep();
+				return;
 			}
 		}
-		
-//	double depth = 0;
-//	
-//	
-////	double xDist = 0.5 * x; //should be xDiff
-////	double yDist = 0.5 * y; //should be yDiff
-//		
-//	double xPos = odo.getXYT()[0];	
-//	double yPos = odo.getXYT()[1];
-//	
-//	double start = xPos;
-//	
-//	nav.travelTo(xPos + depthMax, yPos); //assume this works fam
-//	
-//	
-//	
-//	while(Math.abs(depth) < depthMax) {
-//		//
-//	}
-//		
-//	
-//	nav.travelReverse(xPos, yPos);
 	
 	}
 	
