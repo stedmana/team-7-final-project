@@ -9,7 +9,7 @@ public class Main {
   public static void main(String[] args) {
     Map<String, Integer> debugParams = new HashMap<String,Integer>();
     debugParams.put("RedCorner", 0);
-    Task iTask = new InitTask("192.168.2.11", 1, debugParams, true);
+    Task iTask = new InitTask("192.168.2.11", 1, debugParams, false);
     
     TaskManager t = TaskManager.get();
     

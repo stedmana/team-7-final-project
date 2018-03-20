@@ -248,6 +248,14 @@ public class Navigate {
         rightMotor.rotate((int)-rotation, true);
 	}
 	
+	public void spinLeft(int speed) {
+		double rotation = (Params.TRACK * 180/ Params.WHEEL_RAD);
+        leftMotor.setSpeed(speed);
+        rightMotor.setSpeed(speed);
+        leftMotor.rotate((int)-rotation, true);
+        rightMotor.rotate((int)rotation, true);
+	}
+	
 	/**
      *  Raw part of travel to, robot will travel forward by the given amount.
      *  @param speed - in degrees/sec
@@ -260,5 +268,13 @@ public class Navigate {
 	    rightMotor.setSpeed(speed);
 	    leftMotor.rotateTo(wheelRotations, true);
 	    rightMotor.rotateTo(wheelRotations, false);
+	}
+	
+	/**
+	 * Stop both motors rotation.
+	 */
+	public void stop() {
+		leftMotor.stop(true);
+		rightMotor.stop(false);
 	}
 }
