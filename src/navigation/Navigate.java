@@ -7,21 +7,15 @@ import lejos.robotics.SampleProvider;
 import main.Params;
 
 public class Navigate {
+	private EV3LargeRegulatedMotor leftMotor;
+	private EV3LargeRegulatedMotor rightMotor;
+	private double radius;
+	private double track;
 	
-	
-	private static final int FORWARD_SPEED = 250;
-	private static final int ROTATE_SPEED = 150;
-	private static final double TILE_SIZE = 30.48;
-	
-	private static EV3LargeRegulatedMotor leftMotor;
-	private static EV3LargeRegulatedMotor rightMotor;
-	private static double radius;
-	private static double track;
-	
-	private static Odometer odo;
+	private Odometer odo;
 
-	private static SampleProvider leftLightVal;
-	private static SampleProvider rightLightVal;
+	private SampleProvider leftLightVal;
+	private SampleProvider rightLightVal;
 	
 	/**
 	 * Navigate class used for navigation
@@ -32,7 +26,7 @@ public class Navigate {
 	 * @throws OdometerExceptions
 	 */
 	public Navigate(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor,
-			SampleProvider leftLightVal, SampleProvider rightLightVal) throws OdometerExceptions {
+			SampleProvider leftLightVal, SampleProvider rightLightVal){
 		
 		
 		this.track = Params.TRACK;
@@ -44,8 +38,9 @@ public class Navigate {
 		
 		this.leftLightVal = leftLightVal;
 		this.rightLightVal = rightLightVal;
-		
-		odo = Odometer.getOdometer();
+		try {
+		    odo = Odometer.getOdometer();
+		}catch (Exception e){}
 		
 	}
 	
@@ -58,15 +53,15 @@ public class Navigate {
 	 * @param pointCorrect - does odometry correction about end point if true
 	 * @return
 	 */
-	public static void travelTo(double x, double y, boolean pointCorrect) {
+	public void travelTo(double x, double y, boolean pointCorrect) {
 		
 
 		//get current position from odometer
 		double[] pos = odo.getXYT();
 		
 		//
-		x = x*Navigate.TILE_SIZE;
-		y = y*Navigate.TILE_SIZE;
+		x = x*Params.TILE_LENGTH;
+		y = y*Params.TILE_LENGTH;
 		
 		
 		//get sample arrays for front facing light sensors
@@ -161,16 +156,13 @@ public class Navigate {
 		
 		
 		//TODO: add logic to correct odometer about finishing point
-
-		
-		
 	}
 	
 	/**
 	 * Allows robot to correct theta by driving forward to nearest black line
 	 * and using it to square the theta to that line
 	 */
-	public static void squareUp()
+	public void squareUp()
 	{
 		//get samples
 		float[] sampleLeft = new float[leftLightVal.sampleSize()];
@@ -214,23 +206,59 @@ public class Navigate {
 	 * Turns the robot the minimum distance to face the desired theta heading
 	 * @param theta - in degrees
 	 */
-	public static void turnTo(double theta) {
+	public void turnTo(double theta) {
 
 		double dTheta = theta - odo.getXYT()[2];
 		   
 		   //Insures rotation magnitude will be less than 180
 		   //by normalizing angle about +-180
 		   if(dTheta > 180) {
-		     dTheta -= 360;
+		       dTheta -= 360;
 		   }
-		   else if(dTheta < -180)
-		   {
-		     dTheta += 360;
+		   else if(dTheta < -180) {
+		       dTheta += 360;
 		   }
 		   
 		   //Rotates robot
 		   double rotationAngle = dTheta * (track/(2*radius));
 		   leftMotor.rotate((int) rotationAngle, true);
 		   rightMotor.rotate((int) -rotationAngle, false);
-	}	
+	}
+	
+	public boolean leftMotorSpinning()
+	{
+	    return leftMotor.isMoving();
+	}
+	
+	public boolean rightMotorSpinning()
+    {
+        return rightMotor.isMoving();
+    }
+	
+	/**
+	 *  Turns the robot 360 degrees. Useful for localization etc.
+	 *  @param speed - in degrees/sec
+	 */
+	public void spin(int speed)
+	{
+        double rotation = (Params.TRACK * 180/ Params.WHEEL_RAD);
+        leftMotor.setSpeed(speed);
+        rightMotor.setSpeed(speed);
+        leftMotor.rotate((int)rotation, true);
+        rightMotor.rotate((int)-rotation, true);
+	}
+	
+	/**
+     *  Raw part of travel to, robot will travel forward by the given amount.
+     *  @param speed - in degrees/sec
+     *  @param distance - in cm
+     */
+	public void goForward(int speed, double distance)
+	{
+	    int wheelRotations = (int) ((distance*180)/(Math.PI*Params.WHEEL_RAD));
+	    leftMotor.setSpeed(speed);
+	    rightMotor.setSpeed(speed);
+	    leftMotor.rotateTo(wheelRotations, true);
+	    rightMotor.rotateTo(wheelRotations, false);
+	}
 }

@@ -3,29 +3,27 @@ import fsm.*;
 import fsm.TaskManager.TaskType;
 import tasks.*;
 import static fsm.TaskManager.TaskType.*;
+import java.util.*;
 public class Main {
-
+  
   public static void main(String[] args) {
-    // TODO Auto-generated method stub
-    Task iTask = new InitTask("192.168.2.11", 1);
-    Task lTask = new SampleLocalizeTask();
+    Map<String, Integer> debugParams = new HashMap<String,Integer>();
+    debugParams.put("RedCorner", 0);
+    Task iTask = new InitTask("192.168.2.11", 1, debugParams, true);
+    
     TaskManager t = TaskManager.get();
     
     Thread killThread = new Thread(new Runnable() {
-
-      @Override
-      public void run() {
-          Button.waitForAnyPress();
-          System.exit(1);
-      }
-      
+        @Override
+        public void run() {
+            Button.waitForAnyPress();
+            if(Button.readButtons() == (Button.ID_ENTER | Button.ID_ESCAPE))
+              System.exit(1);
+        }
     });
     killThread.start();
-
+    t.setDebugTaskOrder(INIT);
     t.registerTask(TaskManager.TaskType.INIT, iTask, 10000);
-    t.registerTask(TaskManager.TaskType.LOCALIZE, lTask, 10000);
-    t.registerTask(CROSS_BRIDGE, iTask, 10000);
-    t.setDebugTaskOrder(INIT, LOCALIZE, CROSS_BRIDGE, CROSS_TUNNEL);
     t.start();
     Button.waitForAnyPress();
   }
