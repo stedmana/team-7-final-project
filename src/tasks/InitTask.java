@@ -70,6 +70,7 @@ public class InitTask implements Task {
         int corner = (int)data.get("RedCorner");
         Navigate n = getNavObject();
         Localization locTask = getLocalizationTask(n, corner);
+        
         TaskManager.get().registerTask(TaskType.LOCALIZE, locTask, 60*1000);
         TaskManager.get().setDebugTaskOrder(TaskType.INIT, TaskType.LOCALIZE);
     }
