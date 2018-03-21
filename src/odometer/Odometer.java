@@ -18,7 +18,7 @@ public class Odometer extends OdometerData implements Runnable {
   private static Odometer odo = null; // Returned as singleton
 
   // Motors and related variables
-  private int leftMotorTachoCount;
+  private int leftMotorTachoCount; 
   private int rightMotorTachoCount;
   private int leftOld;
   private int rightOld;
@@ -42,7 +42,7 @@ public class Odometer extends OdometerData implements Runnable {
    * @param rightMotor
    * @throws OdometerExceptions
    */
-  private Odometer(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor,
+  public Odometer(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor,
       final double TRACK, final double WHEEL_RAD) throws OdometerExceptions {
     odoData = OdometerData.getOdometerData(); // Allows access to x,y,z
                                               // manipulation methods

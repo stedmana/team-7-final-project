@@ -22,7 +22,7 @@ public class OdometerData {
   private volatile double theta; // Head angle
 
   // Class control variables
-  private volatile static int numberOfIntances = 0; // Number of OdometerData
+  private volatile static int numberOfIntances = 0; // Number of OdometerData 
                                                     // objects instantiated
                                                     // so far
   private static final int MAX_INSTANCES = 1; // Maximum number of

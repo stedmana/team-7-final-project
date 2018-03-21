@@ -22,7 +22,7 @@ public class Localization implements Task{
     private static double K;
     
     /**
-     * Creates a Localization Object
+     * Creates a Localization Object 
      * @param sensor sensor to record distance with
      * @param n 
      * @param leftMotor left motor object.

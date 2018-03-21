@@ -17,15 +17,15 @@ public class SquareDriver implements Task {
     
     @Override
     public boolean start(boolean prevTaskSuccess) {
-        double dist = Params.TILE_LENGTH * 0;
+        double dist = Params.TILE_LENGTH * 4;
         int rotation = getWheelRotationFromDist(dist);
         
         for(int i = 0; i < 4; i++)
         {
             leftMotor.rotate(rotation, true);
             rightMotor.rotate(rotation, false);
-            leftMotor.rotate(getWheelRotationFromDist(Math.PI * Params.TRACK * 90 / 360.0), true);
-            rightMotor.rotate(-getWheelRotationFromDist(Math.PI * Params.TRACK * 90 / 360.0), false);
+            //leftMotor.rotate(getWheelRotationFromDist(Math.PI * Params.TRACK * 90 / 360.0), true);
+            //rightMotor.rotate(-getWheelRotationFromDist(Math.PI * Params.TRACK * 90 / 360.0), false);
         }
         return true;
     }
