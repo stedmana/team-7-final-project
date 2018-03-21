@@ -84,17 +84,25 @@ public class InitTask implements Task {
         String teamCornerKey = getTeamColor(data) == TaskManager.TEAM_RED ? "RedCorner" : "GreenCorner";
         
         // Create navigate object
-        Navigate n = getNavObject();
+        Navigate nav = getNavObject();
         
         // Create tasks and put into map
-        Localization locTask = getLocalizationTask(n, (int)((long)data.get(teamCornerKey)));
+        Localization locTask = getLocalizationTask(nav, (int)((long)data.get(teamCornerKey)));
+        NavToBridgeTask navToBridge = new NavToBridgeTask(nav, 
+                                                          (int)((long)data.get("BR_LL_x")), 
+                                                          (int)((long)data.get("BR_LL_y")), 
+                                                          (int)((long)data.get("BR_UR_x")), 
+                                                          (int)((long)data.get("BR_UR_y")));
         
         taskMap.put(TaskType.LOCALIZE, locTask);
         tm.registerTask(TaskType.LOCALIZE, locTask, 0);
         
+        taskMap.put(TaskType.NAV_TO_BRIDGE, navToBridge);
+        tm.registerTask(TaskType.NAV_TO_BRIDGE, navToBridge, 0);
+        
         taskMap.put(TaskType.NAV_TO_TUNNEL, null);
+        
         taskMap.put(TaskType.NAV_TO_HOME, null);
-        taskMap.put(TaskType.NAV_TO_BRIDGE, null);
         taskMap.put(TaskType.SEARCH, null);
         taskMap.put(TaskType.CROSS_BRIDGE, null);
         taskMap.put(TaskType.CROSS_TUNNEL, null);

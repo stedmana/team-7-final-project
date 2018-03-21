@@ -8,7 +8,7 @@ public class Params {
      */
     final public static double TRACK = 10.9; // cm
     final public static double WHEEL_RAD = 1.6; // cm
-    final public static double SENSOR_DIST = 0; // cm
+    final public static double SENSOR_DIST = 4.5; // cm
     final public static int SPEED = 200; // deg/sec
     final public static int ACCEL = 800; // deg/sec/sec
     final public static double TILE_LENGTH = 30.48; // cm

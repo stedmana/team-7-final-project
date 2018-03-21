@@ -48,14 +48,19 @@ public class Localization implements Task{
     @Override
     public boolean start(boolean prevTaskSuccess) {
       	usLocalize();
+      	odometer.setTheta(0);
       	navigate.squareUp();
-      	odometer.setTheta(nearestMultiple(90, odometer.getXYT()[2]));
-      	if (corner == 0 || corner == 2) {
-      		odometer.setY(nearestMultiple(Params.TILE_LENGTH, odometer.getXYT()[1]));
-      	} else {
-      		odometer.setX(nearestMultiple(Params.TILE_LENGTH, odometer.getXYT()[0]));
-      	}
+      	Sound.beep();
+      	navigate.goForward(100, Params.SENSOR_DIST);
+      	navigate.turnTo(90);
       	
+      	navigate.squareUp();
+      	Sound.beep();
+      	navigate.goForward(100, Params.SENSOR_DIST);
+      	odometer.setXYT(Params.cornerParams[corner][0], 
+      	                Params.cornerParams[corner][1], 
+      	                Params.cornerParams[corner][2]);
+      	System.out.println(odometer.getXYT());
       	return true;
     }
     
@@ -126,10 +131,7 @@ public class Localization implements Task{
 				above = false;
 				odoValues[1] = odometer.getXYT()[2];
 
-				navigate.stop();
-
-				Sound.beep();
-				
+				navigate.stop();				
 			} else if (above && distCM < D + K && distCM > D - K) {
 				// Distance within the noise interval.
 				above = false;

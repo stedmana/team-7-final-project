@@ -112,7 +112,7 @@ public class Navigate {
             //shift temp value to last
             
             //TODO: remove print line after testing is complete
-            System.out.println("R: "+sampleRight[0]+" SR: "+slopeRight+" L: "+sampleLeft[0]+" SL: "+slopeLeft);
+            //System.out.println("R: "+sampleRight[0]+" SR: "+slopeRight+" L: "+sampleLeft[0]+" SL: "+slopeLeft);
             
             //dynamic theta correction takes place with left and right wheel line detection
             //left motor
@@ -171,7 +171,7 @@ public class Navigate {
             lastValRight = sampleRight[0];
             
             //TODO: remove print line after testing is complete
-            System.out.println("Raw Left: "+sampleLeft[0]+" Slope Left: "+slopeLeft);
+            //System.out.println("Raw Left: "+sampleLeft[0]+" Slope Left: "+slopeLeft);
             
           //dynamic theta correction takes place with left and right wheel line detection
             //left motor
@@ -263,16 +263,16 @@ public class Navigate {
         
         //set speed
         if(fwd) {
-        	leftMotor.setSpeed(100);
-        	rightMotor.setSpeed(100);
+        	    leftMotor.setSpeed(100);
+        	    rightMotor.setSpeed(100);
         }
         else {
-        	leftMotor.setSpeed(-100);
-        	rightMotor.setSpeed(-100);
+        	    leftMotor.setSpeed(-100);
+        	    rightMotor.setSpeed(-100);
         }
         
-        boolean leftDetect = true;
-        boolean rightDetect = true;
+        boolean leftDetect = false;
+        boolean rightDetect = false;
         
         //drive forward
         leftMotor.forward();
@@ -288,16 +288,15 @@ public class Navigate {
             if(sampleLeft[0] < 0.4)
             {
               leftMotor.stop(true);
-              Sound.beep();
-              leftDetect = false;
+              leftDetect = true;
               
             }
             if(sampleRight[0] < 0.4)
             {
 	          rightMotor.stop(true);
-	          rightDetect = false;
+	          rightDetect = true;
             }
-        }while(leftDetect || rightDetect);
+        }while(!leftDetect || !rightDetect);
 	}
 	
 	/**
@@ -364,8 +363,10 @@ public class Navigate {
 	    int wheelRotations = (int) ((distance*180)/(Math.PI*Params.WHEEL_RAD));
 	    leftMotor.setSpeed(speed);
 	    rightMotor.setSpeed(speed);
-	    leftMotor.rotateTo(wheelRotations, true);
-	    rightMotor.rotateTo(wheelRotations, false);
+	    leftMotor.rotate(wheelRotations, true);
+	    rightMotor.rotate(wheelRotations, false);
+	    leftMotor.setSpeed(Params.SPEED);
+        rightMotor.setSpeed(Params.SPEED);
 	}
 	
 	/**
