@@ -21,4 +21,6 @@ public class Params {
         {7 * TILE_LENGTH, 7 * TILE_LENGTH, 270},
         {    TILE_LENGTH, 7 * TILE_LENGTH, 180}
     };
+    
+    final public static int BOARD_SIZE = 8;
 }

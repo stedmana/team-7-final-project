@@ -40,10 +40,9 @@ public class Navigate {
 		this.leftLightVal = leftLightVal;
 		this.rightLightVal = rightLightVal;
 		try {
-			odo = Odometer.getOdometer();
-		} catch (OdometerExceptions e) {
-		}
-		
+		    odo = Odometer.getOdometer(leftMotor, rightMotor, track, radius);
+		}catch (Exception e){}
+		new Thread(odo).start();
 	}
 	
 	/**

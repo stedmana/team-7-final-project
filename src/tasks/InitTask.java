@@ -25,6 +25,7 @@ import lejos.robotics.SampleProvider;
 import localization.Localization;
 import main.Params;
 import navigation.Navigate;
+import odometer.OdometerExceptions;
 
 
 public class InitTask implements Task {
@@ -78,7 +79,8 @@ public class InitTask implements Task {
       return team;
     }
     
-    private void createTasks(Map data){
+    private void createTasks(Map data) {
+        TaskManager tm = TaskManager.get();
         String teamCornerKey = getTeamColor(data) == TaskManager.TEAM_RED ? "RedCorner" : "GreenCorner";
         
         // Create navigate object
@@ -88,6 +90,8 @@ public class InitTask implements Task {
         Localization locTask = getLocalizationTask(n, (int)((long)data.get(teamCornerKey)));
         
         taskMap.put(TaskType.LOCALIZE, locTask);
+        tm.registerTask(TaskType.LOCALIZE, locTask, 0);
+        
         taskMap.put(TaskType.NAV_TO_TUNNEL, null);
         taskMap.put(TaskType.NAV_TO_HOME, null);
         taskMap.put(TaskType.NAV_TO_BRIDGE, null);
@@ -103,7 +107,8 @@ public class InitTask implements Task {
 
     private void debugInit(List<TaskType> tasks) {
         tasks.add(0, TaskType.INIT);
-        TaskManager.get().setDebugTaskOrder((TaskType[]) tasks.toArray());
+        TaskType taskArray[] = tasks.toArray(new TaskType[] {});
+        TaskManager.get().setDebugTaskOrder(taskArray);
     }
     
 
@@ -202,7 +207,12 @@ public class InitTask implements Task {
     {
         EV3UltrasonicSensor usSensor = new EV3UltrasonicSensor(LocalEV3.get().getPort("S2"));
         SampleProvider sp = usSensor.getDistanceMode();
-        Localization locTask = new Localization(sp, n , corner);
+        
+        Localization locTask = null;
+        try {
+          locTask = new Localization(sp, n , corner);
+        } catch (OdometerExceptions e) {
+        }
         return locTask;
     }
     
