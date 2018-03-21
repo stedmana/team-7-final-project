@@ -1,7 +1,5 @@
 import lejos.hardware.Button;
-<<<<<<< HEAD
 import main.Params;
-=======
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.port.Port;
@@ -12,7 +10,6 @@ import main.Params;
 import navigation.Navigate;
 import odometer.Odometer;
 import odometer.OdometerExceptions;
->>>>>>> add test stuff
 import fsm.*;
 import fsm.TaskManager.TaskType;
 import tasks.*;
