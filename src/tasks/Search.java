@@ -4,12 +4,10 @@ import odometer.*;
 import lejos.hardware.Sound;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.robotics.SampleProvider;
-import java.util.ArrayList;
 import ca.mcgill.ecse211.detectColor.*;
-import lejos.utility.Timer;
+import fsm.Task;
 
-
-public class Search {
+public class Search implements Task {
 	
 	private static double llx;
 	private static double lly;
@@ -35,6 +33,8 @@ public class Search {
 	int colour;
 
 	int targetColour;
+	
+	boolean taskSuccess;
 	
 	/**
 	 * Creates the search class, which enables the robot to createa 2-d map of the search area,
@@ -93,7 +93,10 @@ public class Search {
 	/**
 	 *Enables the robot to travel to each corner of the search area,
 	 *and then probe for blocks afterwards */
-	public void run() {
+	public boolean start(boolean prevTaskSuccess) {
+		
+		taskSuccess = false;
+		
 	float data[] = new float[ultraSonic.sampleSize()];
 	int i = 0;
 		
@@ -139,7 +142,13 @@ public class Search {
 			}
 		}
 		
-		probe(targetColour);
+		int val = probe(targetColour);
+		if(val == 1) {
+			taskSuccess = true;
+		} else {
+			taskSuccess = false;
+		}
+		return taskSuccess;
 	}
 	
 	
@@ -147,7 +156,10 @@ public class Search {
 	 * Drives to each object saved in the 2-d map, in order to identify colour
 	 * @param targetColour - an int corresponding to a blue, red, yellow or white block
 	 * */
-	public void probe(int targetColour) { //have color detection running in the background
+	public int probe(int targetColour) { //have color detection running in the background
+		
+		int val = 0;
+		//0 is false, 1 is true
 		
 		float data[] = new float[ultraSonic.sampleSize()];
 		
@@ -174,10 +186,14 @@ public class Search {
 				Sound.beep();
 				Sound.beep();
 				Sound.beep();
-				return;
+				val = 1;
 			}
 		}
+	return val;
+	}
 	
+	public void stop() {
+		//force the program to exit - perhaps use EXIT;
 	}
 	
 }
