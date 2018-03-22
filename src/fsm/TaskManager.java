@@ -2,6 +2,8 @@ package fsm;
 
 import java.util.*;
 import java.util.concurrent.Semaphore;
+import lejos.hardware.Sound;
+import lejos.hardware.lcd.LCD;
 import static fsm.TaskManager.TaskType.*;
 
 class TaskInfo{
@@ -135,11 +137,14 @@ public class TaskManager {
                     } 
                  }, currentTask.allotedTimeMs);
                  
+                 LCD.clear();
+                 System.out.println(currentTaskID);
                  currentTask.success = currentTask.task.start(prevTaskSuccess);
                  currentTask.started = true;
                  synchronized(this) {
                      currentTask.finished = true;
                  }
+                 Sound.twoBeeps();
              }
          }         
      }

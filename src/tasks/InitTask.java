@@ -25,10 +25,23 @@ import lejos.robotics.SampleProvider;
 import localization.Localization;
 import main.Params;
 import navigation.Navigate;
+import odometer.Odometer;
 import odometer.OdometerExceptions;
 
 
 public class InitTask implements Task {
+    // Light sensor
+    EV3ColorSensor leftColorSensor = 
+        new EV3ColorSensor(LocalEV3.get().getPort("S4"));
+    EV3ColorSensor rightColorSensor = 
+        new EV3ColorSensor(LocalEV3.get().getPort("S3"));
+    SampleProvider lSampleProv = leftColorSensor.getRedMode();
+    SampleProvider rSampleProv = rightColorSensor.getRedMode();
+  
+    // Ultrasonic sensor
+    EV3UltrasonicSensor usSensor = new EV3UltrasonicSensor(LocalEV3.get().getPort("S2"));
+    SampleProvider sp = usSensor.getDistanceMode();
+  
     static WifiConnection conn;
     
     private final int taskOffset = TaskType.INIT.ordinal();
@@ -84,15 +97,21 @@ public class InitTask implements Task {
         String teamCornerKey = getTeamColor(data) == TaskManager.TEAM_RED ? "RedCorner" : "GreenCorner";
         
         // Create navigate object
-        Navigate nav = getNavObject();
+        final Navigate nav = getNavObject();
         
         // Create tasks and put into map
         Localization locTask = getLocalizationTask(nav, (int)((long)data.get(teamCornerKey)));
-        NavToBridgeTask navToBridge = new NavToBridgeTask(nav, 
-                                                          (int)((long)data.get("BR_LL_x")), 
-                                                          (int)((long)data.get("BR_LL_y")), 
-                                                          (int)((long)data.get("BR_UR_x")), 
-                                                          (int)((long)data.get("BR_UR_y")));
+        NavToRecTask navToBridge = new NavToRecTask(nav, 
+                                                    (int)((long)data.get("BR_LL_x")), 
+                                                    (int)((long)data.get("BR_LL_y")), 
+                                                    (int)((long)data.get("BR_UR_x")), 
+                                                    (int)((long)data.get("BR_UR_y")));
+        
+        NavToRecTask navToTunnel = new NavToRecTask(nav,
+                                                    (int)((long)data.get("TN_LL_x")), 
+                                                    (int)((long)data.get("TN_LL_y")), 
+                                                    (int)((long)data.get("TN_UR_x")), 
+                                                    (int)((long)data.get("TN_UR_y")));
         
         taskMap.put(TaskType.LOCALIZE, locTask);
         tm.registerTask(TaskType.LOCALIZE, locTask, 0);
@@ -100,12 +119,42 @@ public class InitTask implements Task {
         taskMap.put(TaskType.NAV_TO_BRIDGE, navToBridge);
         tm.registerTask(TaskType.NAV_TO_BRIDGE, navToBridge, 0);
         
-        taskMap.put(TaskType.NAV_TO_TUNNEL, null);
+        taskMap.put(TaskType.NAV_TO_TUNNEL, navToTunnel);
+        tm.registerTask(TaskType.NAV_TO_TUNNEL, navToTunnel, 0);
         
         taskMap.put(TaskType.NAV_TO_HOME, null);
         taskMap.put(TaskType.SEARCH, null);
+        
         taskMap.put(TaskType.CROSS_BRIDGE, null);
+        tm.registerTask(TaskType.CROSS_BRIDGE, new Task() {
+
+          @Override
+          public boolean start(boolean prevTaskSuccess) {
+            return false;
+          }
+
+          @Override
+          public void stop() {
+            // TODO Auto-generated method stub
+            
+          }
+          
+        }, 0);
         taskMap.put(TaskType.CROSS_TUNNEL, null);
+        tm.registerTask(TaskType.CROSS_TUNNEL, new Task() {
+
+          @Override
+          public boolean start(boolean prevTaskSuccess) {
+              return false;
+          }
+
+          @Override
+          public void stop() {
+            // TODO Auto-generated method stub
+            
+          }
+          
+        }, 0);
     }
     
     private void initFullTaskOrder(int teamID) {
@@ -199,12 +248,6 @@ public class InitTask implements Task {
     @SuppressWarnings("resource")
     private Navigate getNavObject()
     {
-        EV3ColorSensor leftColorSensor = 
-            new EV3ColorSensor(LocalEV3.get().getPort("S4"));
-        EV3ColorSensor rightColorSensor = 
-            new EV3ColorSensor(LocalEV3.get().getPort("S3"));
-        SampleProvider lSampleProv = leftColorSensor.getRedMode();
-        SampleProvider rSampleProv = rightColorSensor.getRedMode();
         return new Navigate(new EV3LargeRegulatedMotor(LocalEV3.get().getPort("B")),
                             new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A")),
                             lSampleProv, rSampleProv);
@@ -213,9 +256,6 @@ public class InitTask implements Task {
     @SuppressWarnings("resource")
     private Localization getLocalizationTask(Navigate n, int corner)
     {
-        EV3UltrasonicSensor usSensor = new EV3UltrasonicSensor(LocalEV3.get().getPort("S2"));
-        SampleProvider sp = usSensor.getDistanceMode();
-        
         Localization locTask = null;
         try {
           locTask = new Localization(sp, n , corner);
