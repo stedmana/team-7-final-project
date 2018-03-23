@@ -27,38 +27,37 @@ public class Localization implements Task{
      * @param n 
      * @param leftMotor left motor object.
      * @param rightMotor right motor object.
+     * @throws OdometerExceptions 
      */
     public Localization(final SampleProvider sensor,
-                        Navigate n, int corner)
+                        Navigate n, int corner) throws OdometerExceptions
     {
         this.us = sensor;
         this.corner = corner;
         this.navigate = n;
         Odometer tmpOdom = null;
-        try {
-          tmpOdom = Odometer.getOdometer();
-        } catch (OdometerExceptions e) {
-          e.printStackTrace();
-        }
+        tmpOdom = Odometer.getOdometer();
         this.odometer = tmpOdom;
         
     }
-
     
+    @Override
     public boolean start(boolean prevTaskSuccess) {
-    	//boolean success = false;
-    	
-    	usLocalize();
-    	
-    	navigate.squareUp();
-    	odometer.setTheta(nearestMultiple(90, odometer.getXYT()[2]));
-    	if (corner == 0 || corner == 2) {
-    		odometer.setY(nearestMultiple(Params.TILE_LENGTH, odometer.getXYT()[1]));
-    	} else {
-    		odometer.setX(nearestMultiple(Params.TILE_LENGTH, odometer.getXYT()[0]));
-    	}
-    	
-    	return true;
+      	usLocalize();
+      	odometer.setTheta(0);
+      	navigate.squareUp();
+      	Sound.beep();
+      	navigate.goForward(100, Params.SENSOR_DIST);
+      	navigate.turnTo(90);
+      	
+      	navigate.squareUp();
+      	Sound.beep();
+      	navigate.goForward(100, Params.SENSOR_DIST);
+      	odometer.setXYT(Params.cornerParams[corner][0], 
+      	                Params.cornerParams[corner][1], 
+      	                Params.cornerParams[corner][2]);
+      	System.out.println(odometer.getXYT());
+      	return true;
     }
         
     private double nearestMultiple(double base, double num) {
@@ -132,10 +131,7 @@ public class Localization implements Task{
 				above = false;
 				odoValues[1] = odometer.getXYT()[2];
 
-				navigate.stop();
-
-				Sound.beep();
-				
+				navigate.stop();				
 			} else if (above && distCM < D + K && distCM > D - K) {
 				// Distance within the noise interval.
 				above = false;
@@ -220,10 +216,10 @@ public class Localization implements Task{
 			middleTheta += 180;
 		}
 
-		// Turn to the middle which is at 45�.
+		// Turn to 0.
 		navigate.turnTo(middleTheta - 45);
 		odometer.setXYT(Params.cornerParams[corner][0], Params.cornerParams[corner][1], Params.cornerParams[corner][2]);		
-		// Turn to 0.
+		
 	}
     
     

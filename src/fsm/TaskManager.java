@@ -2,6 +2,8 @@ package fsm;
 
 import java.util.*;
 import java.util.concurrent.Semaphore;
+import lejos.hardware.Sound;
+import lejos.hardware.lcd.LCD;
 import static fsm.TaskManager.TaskType.*;
 
 class TaskInfo{
@@ -9,11 +11,13 @@ class TaskInfo{
         task = t;
         allotedTimeMs = allotedTime;
         finished = false;
+        started = false;
     }
     public Task task;
     public long allotedTimeMs;
     public boolean success;
     public boolean finished;
+    public boolean started;
 }
 
 public class TaskManager {
@@ -58,6 +62,9 @@ public class TaskManager {
       * @param allotedTime Time allowed for the task, only used for premptimble tasks
       */
      public void registerTask(TaskType taskID, Task t, long allotedTime) {
+         if((allotedTime *= 1000) == 0) {
+             allotedTime = Integer.MAX_VALUE;
+         }
          idMap.put(taskID, new TaskInfo(t, allotedTime));
      }
      
@@ -87,7 +94,7 @@ public class TaskManager {
       */
      public synchronized void onTimerCallback(TaskType taskID) {
          TaskInfo ti = idMap.get(taskID);
-         if(!ti.finished) {
+         if(!ti.finished && ti.started) {
              ti.task.stop();
              ti.success = false;
          }
@@ -130,10 +137,14 @@ public class TaskManager {
                     } 
                  }, currentTask.allotedTimeMs);
                  
+                 LCD.clear();
+                 System.out.println(currentTaskID);
                  currentTask.success = currentTask.task.start(prevTaskSuccess);
+                 currentTask.started = true;
                  synchronized(this) {
                      currentTask.finished = true;
                  }
+                 Sound.twoBeeps();
              }
          }         
      }
