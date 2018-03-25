@@ -113,6 +113,8 @@ public class InitTask implements Task {
                                                     (int)((long)data.get("TN_UR_x")), 
                                                     (int)((long)data.get("TN_UR_y")));
         
+        
+        
         taskMap.put(TaskType.LOCALIZE, locTask);
         tm.registerTask(TaskType.LOCALIZE, locTask, 0);
         

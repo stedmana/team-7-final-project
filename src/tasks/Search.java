@@ -152,7 +152,7 @@ public class Search implements Task {
 	}
 	
 	
-	/*
+	/**
 	 * Drives to each object saved in the 2-d map, in order to identify colour
 	 * @param targetColour - an int corresponding to a blue, red, yellow or white block
 	 * */

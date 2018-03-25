@@ -50,16 +50,38 @@ public class Navigate {
 	}
 	
 	/**
+	 * 
+	 * @param x - cartesian x coordinate of destination
+	 * @param y - cartesian y coordinate of destination
+	 * @param theta - desired final theta heading
+	 * @param diff - if true robot uses differential line sensing, false is hard-coded
+	 */
+	public void travelTo(double x, double y, double theta, boolean diff) {
+		
+		//allows choice between differential or hard-coded line sensing
+		if(!diff)
+			navigateTo(x,y,theta);
+		else
+			diffTravelTo(x,y,theta);
+		
+		
+	}
+	
+	/**
 	 * Navigate to a given coordinate.
 	 * 
-	 * @param x - Navigation coordinate X in cm
-	 * @param y - Navigation coordinate Y in cm
-	 * @param theta - Final angle in cm
+	 * @param x - Navigation coordinate X in cartesian
+	 * @param y - Navigation coordinate Y in cartesian
+	 * @param theta - Final angle in degrees
 	 */
 	public void navigateTo(double x, double y, double theta) {
 	    // Set our speeds
 	    leftMotor.setSpeed(Params.SPEED);
 	    rightMotor.setSpeed(Params.SPEED);
+	    
+	    //change to cm
+	    x = x*Params.TILE_LENGTH;
+	    y = y*Params.TILE_LENGTH;
 	    
 	    double[] pos = odo.getXYT();
 	    travelForward(y-pos[1], DIR_Y);
@@ -142,8 +164,11 @@ public class Navigate {
   	  
   	  leftMotor.stop(true);
   	  rightMotor.stop(false);
-  	  double remainingDist = Math.abs((goal - odo.getXYT()[direction])); // dead reckon the remaining amount
-  	  if(remainingDist > 0) remainingDist = (Params.TILE_LENGTH-Params.SENSOR_DIST)/2; 
+  	  double remainingDist = (goal - odo.getXYT()[direction]); // dead reckon the remaining amount
+  	  if(remainingDist > 0) 
+  		  remainingDist = (Params.TILE_LENGTH-Params.SENSOR_DIST)/2; 
+  	  else
+  		  remainingDist = 0;
   	  goForward(Params.SPEED, remainingDist);
 	}
 	
@@ -158,7 +183,7 @@ public class Navigate {
 	 * @param pointCorrect - does odometry correction about end point if true, orients facing 0 degrees
 	 * @return
 	 */
-	public void travelTo(double x, double y, boolean pointCorrect) {
+	public void diffTravelTo(double x, double y, double theta) {
 		
 		//set speed
 		leftMotor.setSpeed(Params.SPEED);
@@ -205,37 +230,47 @@ public class Navigate {
             slopeLeft = sampleLeft[0] - lastValLeft;
             slopeRight = sampleRight[0] - lastValRight;
             
-            //record value for future reference
+            //record value for future reference (increased window size)
             lastValLeft = tempValLeft;
             lastValRight = tempValRight;
             tempValLeft = sampleLeft[0];
             tempValRight = sampleRight[0];
             
-            //shift temp value to last
+            //TODO: remove print line after testing is complete
+            
+            System.out.println(sampleLeft[0] + "\t" + sampleRight[0]);
             
             //dynamic theta correction takes place with left and right wheel line detection
             //left motor
             if(slopeLeft < Params.DIFF_THRESHOLD && leftMotor.isMoving())
             {
               leftMotor.stop(true);
+              //System.out.println("LEFT STOP");
+              //System.out.println("Raw Left: "+sampleLeft[0]+"\t Slope Left: "+slopeLeft+"\t Raw Right: "+sampleRight[0]+"\t Slope Right: "+slopeRight);
             }
             //right motor
             if(slopeRight < Params.DIFF_THRESHOLD && rightMotor.isMoving())
             {
+            	
 	          rightMotor.stop(true);
+	          //System.out.println("RIGHT STOP");
+	          //System.out.println("Raw Left: "+sampleLeft[0]+"\t Slope Left: "+slopeLeft+"\t Raw Right: "+sampleRight[0]+"\t Slope Right: "+slopeRight);
 	          
             }
             //resets once line is hit
             if(!leftMotor.isMoving() && !rightMotor.isMoving()) {
             	
             	//dynamic theta correction
-            	if(odo.getXYT()[2] > 90 && odo.getXYT()[2] < 270)
+            	if(odo.getXYT()[2] > 90 && odo.getXYT()[2] < 270) {
             		odo.setTheta(180);
-            	else
+            		odo.setY(Math.floor((odo.getXYT()[1] + 2*Params.SENSOR_DIST) / Params.TILE_LENGTH)*Params.TILE_LENGTH + Params.SENSOR_DIST);
+            	}
+            	else {
             		odo.setTheta(0);
+            		odo.setY(Math.floor((odo.getXYT()[1] + 2*Params.SENSOR_DIST) / Params.TILE_LENGTH)*Params.TILE_LENGTH - Params.SENSOR_DIST);
+            	}
             	
-            	//correcting odometer y value
-            	odo.setY(((int)(odo.getXYT()[1] + 5) / Params.TILE_LENGTH)*Params.TILE_LENGTH);
+            	
             	
             	//start robot moving again
             	rightMotor.forward();
@@ -248,6 +283,8 @@ public class Navigate {
 		//y coordinate has been reached
 		leftMotor.stop(true);
 		rightMotor.stop(false);
+		
+		System.out.println("Turning to x coordinates");
 		
 		//turn towards x coordinate
 		if(x - pos[0] > 0)
@@ -288,13 +325,15 @@ public class Navigate {
             if(!leftMotor.isMoving() && !rightMotor.isMoving()){
             	
             	//correcting odometer theta
-            	if(odo.getXYT()[2] > 0 && odo.getXYT()[2] < 180)
+            	if(odo.getXYT()[2] > 0 && odo.getXYT()[2] < 180) {
             		odo.setTheta(90);
-            	else
+            		odo.setX(Math.floor((odo.getXYT()[0] + 2*Params.SENSOR_DIST) / Params.TILE_LENGTH) * Params.TILE_LENGTH - Params.SENSOR_DIST);
+            	}
+            	else {
             		odo.setTheta(270);
+            		odo.setX(Math.floor((odo.getXYT()[0] + 2*Params.SENSOR_DIST) / Params.TILE_LENGTH) * Params.TILE_LENGTH + Params.SENSOR_DIST);
+            	}
             	
-            	//correcting odometer x value
-            	odo.setX(((int)(odo.getXYT()[0] + 5) / Params.TILE_LENGTH)*Params.TILE_LENGTH);
             	
             	//restarting motors
             	rightMotor.forward();
@@ -308,38 +347,12 @@ public class Navigate {
 		rightMotor.stop(true);
 		leftMotor.stop(false);
 		
+		//rotate to desired final theta heading
+		turnTo(theta);
 		
-		//TODO: add logic to correct odometer about finishing point
-		
-		//call pointCorrect method if requested
-		if(pointCorrect)
-			pointCorrect(x,y);
 			
 	}
 	
-	/**
-	 * Starting with the assumption that the robot is near a cartesian coordinate
-	 * facing along the x direction
-	 * @param x - x double value of coordinate being corrected about
-	 * @param y - y double value of coordinate being corrected about
-	 */
-	public void pointCorrect(double x, double y) {
-		
-		//correct the y precision
-		squareUp(false);
-		leftMotor.rotate((int)Math.toDegrees(Params.SENSOR_DIST/Params.WHEEL_RAD),true);
-		rightMotor.rotate((int)Math.toDegrees(Params.SENSOR_DIST/Params.WHEEL_RAD),false);
-		
-		//turn to face 0 degrees
-		turnTo(0);
-		
-		//correct the x precision and theta precision
-		squareUp(false);
-		leftMotor.rotate((int)Math.toDegrees(Params.SENSOR_DIST/Params.WHEEL_RAD),true);
-		rightMotor.rotate((int)Math.toDegrees(Params.SENSOR_DIST/Params.WHEEL_RAD),false);
-		odo.setXYT(x, y, 0);
-		
-	}
 	/**
 	 * Used to get around boolean argument of squareUp(boolean fwd)
 	 * Has no parameters
