@@ -56,26 +56,30 @@ public class InitTask implements Task {
 
     private Map data;
     
-    public InitTask(String server, int teamNum, Map<String, Integer> params, boolean debug)
+    public InitTask(String server, int teamNum, Map<String, Long> debugParams, boolean debug)
     {
         this.debug = debug;
-        this.debugParams = params;
+        this.debugParams = debugParams;
         this.server = server;
         this.teamNum = teamNum;
     }
     
     
-    @SuppressWarnings("rawtypes")
     @Override
     public boolean start(boolean prevTaskSuccess) 
     {
         boolean success = true;
-        try {
-            this.data = getParams();
-        } catch (Exception e) {
-           success = false;
-           return success; // stop if we fail at getting params
+        if(debugParams == null) {
+            try {
+                this.data = getParams();
+            } catch (Exception e) {
+               success = false;
+               return success; // stop if we fail at getting params
+            }
+        } else {
+            data = debugParams;
         }
+        
         createTasks(data);
         if(debug) {
             debugInit(showDebugMenu());
@@ -128,35 +132,7 @@ public class InitTask implements Task {
         taskMap.put(TaskType.SEARCH, null);
         
         taskMap.put(TaskType.CROSS_BRIDGE, null);
-        tm.registerTask(TaskType.CROSS_BRIDGE, new Task() {
-
-          @Override
-          public boolean start(boolean prevTaskSuccess) {
-            return false;
-          }
-
-          @Override
-          public void stop() {
-            // TODO Auto-generated method stub
-            
-          }
-          
-        }, 0);
         taskMap.put(TaskType.CROSS_TUNNEL, null);
-        tm.registerTask(TaskType.CROSS_TUNNEL, new Task() {
-
-          @Override
-          public boolean start(boolean prevTaskSuccess) {
-              return false;
-          }
-
-          @Override
-          public void stop() {
-            // TODO Auto-generated method stub
-            
-          }
-          
-        }, 0);
     }
     
     private void initFullTaskOrder(int teamID) {

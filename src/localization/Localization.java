@@ -217,7 +217,7 @@ public class Localization implements Task{
 		}
 
 		// Turn to 0.
-		navigate.turnTo(middleTheta - 45);
+		navigate.turnTo(middleTheta - 45 - 90);
 		odometer.setXYT(Params.cornerParams[corner][0], Params.cornerParams[corner][1], Params.cornerParams[corner][2]);		
 		
 	}

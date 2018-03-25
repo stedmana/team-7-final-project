@@ -1,5 +1,8 @@
 package main;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Params {
     /*
      * This class is to store all the parameters for the robot. Only store things here
@@ -24,4 +27,22 @@ public class Params {
     };
     
     final public static int BOARD_SIZE = 8;
+    
+    // Sample set of competition params so we don't have to connect to the server to test all
+    // the time.
+    final public static Map<String, Long> debugCompetitionParams;
+    static
+    {
+        debugCompetitionParams = new HashMap<String, Long>();
+        debugCompetitionParams.put("RedTeam", (long) TEAM_ID);
+        debugCompetitionParams.put("RedCorner", (long) 3);
+        debugCompetitionParams.put("BR_LL_x", (long) 0);
+        debugCompetitionParams.put("BR_LL_y", (long) 0);
+        debugCompetitionParams.put("BR_UR_x", (long) 0);
+        debugCompetitionParams.put("BR_UR_y", (long) 0);
+        debugCompetitionParams.put("TN_LL_x", (long) 0);
+        debugCompetitionParams.put("TN_LL_y", (long) 0);
+        debugCompetitionParams.put("TN_UR_x", (long) 0);
+        debugCompetitionParams.put("TN_UR_y", (long) 0);
+    }
 }
