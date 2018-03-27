@@ -151,7 +151,7 @@ public class InitTask implements Task {
             
           }
           
-        }, allotedTime);
+        }, 0);
     }
     
     private void initFullTaskOrder(int teamID) {
