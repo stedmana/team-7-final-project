@@ -24,25 +24,14 @@ public class Main {
   }
   
   public static void main(String[] args) {
-<<<<<<< HEAD
-    Map<String, Integer> debugParams = new HashMap<String,Integer>();
-    debugParams.put("RedCorner", 0);
-    //Task iTask = new InitTask("192.168.2.19", Params.TEAM_ID, debugParams, true);
-    
-    
-=======
     Task iTask = new InitTask("192.168.2.5", Params.TEAM_ID, Params.debugCompetitionParams, true);
->>>>>>> aa542b82bf197154bd1bca27791dc755d5c52d93
     
     TaskManager t = TaskManager.get();
     getKillThread().start();
     
-    NavTestTask navTest = new NavTestTask();
-    
     // Start init task
     t.setDebugTaskOrder(INIT);
-    t.registerTask(TaskManager.TaskType.INIT, navTest, 10000);
-    
+    t.registerTask(TaskManager.TaskType.INIT, iTask, 10000);
     t.start();
     Button.waitForAnyPress();
   }
