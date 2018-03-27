@@ -104,7 +104,8 @@ public class InitTask implements Task {
         final Navigate nav = getNavObject();
         
         // Create tasks and put into map
-        Localization locTask = getLocalizationTask(nav, (int)((long)data.get(teamCornerKey)));
+        final int corner = (int)((long)data.get(teamCornerKey));
+        Localization locTask = getLocalizationTask(nav, corner);
         NavToRecTask navToBridge = new NavToRecTask(nav, 
                                                     (int)((long)data.get("BR_LL_x")), 
                                                     (int)((long)data.get("BR_LL_y")), 
@@ -116,6 +117,8 @@ public class InitTask implements Task {
                                                     (int)((long)data.get("TN_LL_y")), 
                                                     (int)((long)data.get("TN_UR_x")), 
                                                     (int)((long)data.get("TN_UR_y")));
+        
+        CrossBridgeTask crossBridge = new CrossBridgeTask(nav);
         
         
         
@@ -131,8 +134,24 @@ public class InitTask implements Task {
         taskMap.put(TaskType.NAV_TO_HOME, null);
         taskMap.put(TaskType.SEARCH, null);
         
-        taskMap.put(TaskType.CROSS_BRIDGE, null);
-        taskMap.put(TaskType.CROSS_TUNNEL, null);
+        
+        tm.registerTask(TaskType.CROSS_BRIDGE, crossBridge, 0);
+        tm.registerTask(TaskType.CROSS_TUNNEL, crossBridge, 0);
+        tm.registerTask(TaskType.NAV_TO_HOME, new Task() {
+
+          @Override
+          public boolean start(boolean prevTaskSuccess) {
+            nav.navigateTo(Params.cornerParams[corner][0], Params.cornerParams[corner][1], Params.cornerParams[corner][2]);
+            return true;
+          }
+
+          @Override
+          public void stop() {
+            // TODO Auto-generated method stub
+            
+          }
+          
+        }, allotedTime);
     }
     
     private void initFullTaskOrder(int teamID) {
