@@ -9,6 +9,7 @@ public class Params {
      * that will not change. i.e descriptions about our hardware, regular constants like speed
      * etc. Put units beside each value.
      */
+    final public static String SERVER_IP = "192.168.2.3";
     final public static double TRACK = 10.7; // cm
     final public static double WHEEL_RAD = 1.6; // cm
     final public static double SENSOR_DIST = 4.5; // cm
@@ -20,9 +21,9 @@ public class Params {
     final public static int TEAM_ID = 7;
     // Corner location  parameters 
     public final static double cornerParams[][] = {
-        {    TILE_LENGTH,     TILE_LENGTH,  0},
+        {    TILE_LENGTH,     TILE_LENGTH,  90},
         {7 * TILE_LENGTH,     TILE_LENGTH,  0},
-        {7 * TILE_LENGTH, 7 * TILE_LENGTH, 180},
+        {7 * TILE_LENGTH, 7 * TILE_LENGTH, 270},
         {    TILE_LENGTH, 7 * TILE_LENGTH, 180}
     };
     
@@ -34,15 +35,15 @@ public class Params {
     static
     {
         debugCompetitionParams = new HashMap<String, Long>();
-        debugCompetitionParams.put("RedTeam", (long) TEAM_ID);
-        debugCompetitionParams.put("RedCorner", (long) 3);
-        debugCompetitionParams.put("BR_LL_x", (long) 0);
-        debugCompetitionParams.put("BR_LL_y", (long) 0);
-        debugCompetitionParams.put("BR_UR_x", (long) 0);
-        debugCompetitionParams.put("BR_UR_y", (long) 0);
-        debugCompetitionParams.put("TN_LL_x", (long) 0);
-        debugCompetitionParams.put("TN_LL_y", (long) 0);
-        debugCompetitionParams.put("TN_UR_x", (long) 0);
-        debugCompetitionParams.put("TN_UR_y", (long) 0);
+        debugCompetitionParams.put("GreenTeam", (long) TEAM_ID);
+        debugCompetitionParams.put("GreenCorner", (long) 0);
+        debugCompetitionParams.put("TN_LL_x", (long) 3);
+        debugCompetitionParams.put("TN_LL_y", (long) 3);
+        debugCompetitionParams.put("TN_UR_x", (long) 4);
+        debugCompetitionParams.put("TN_UR_y", (long) 5);
+        debugCompetitionParams.put("BR_LL_x", (long) 5);
+        debugCompetitionParams.put("BR_LL_y", (long) 3);
+        debugCompetitionParams.put("BR_UR_x", (long) 6);
+        debugCompetitionParams.put("BR_UR_y", (long) 5);
     }
 }

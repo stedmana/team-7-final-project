@@ -35,27 +35,15 @@ public class NavToRecTask implements Task {
       currentPos = odo.getXYT();
       
       double  bridgePosition[] = calculateEntrance(currentPos);
-      nav.navigateTo(bridgePosition[0] * Params.TILE_LENGTH, 
-                     bridgePosition[1] * Params.TILE_LENGTH, 
-                     bridgePosition[2]);
-      
+      nav.travelTo(bridgePosition[0], 
+                     bridgePosition[1], 
+                     bridgePosition[2], 
+                     false);
       nav.squareUp(false);
-      nav.goForward(Params.SPEED/2, 3.5*Params.TILE_LENGTH);
-      nav.squareUp();
-      nav.goForward(Params.SPEED/2, Params.SENSOR_DIST);
-      
-      double[] pos = odo.getXYT();
-      if(bridgePosition[2] % 180 == 0) {
-        int sgn = bridgePosition[2] == 0 ? 1:-1;
-        odo.setXYT(bridgePosition[0] * Params.TILE_LENGTH, 
-                   (bridgePosition[1]+ sgn * 3.5)*Params.TILE_LENGTH, 
-                   bridgePosition[2]);
-      } else {
-        int sgn = bridgePosition[2] == 90 ? 1:-1;
-        odo.setXYT((bridgePosition[0]+ sgn * 3.5)*Params.TILE_LENGTH, 
-                   bridgePosition[1]*Params.TILE_LENGTH, 
-                   bridgePosition[2]);
-      }
+      nav.goForward(Params.SPEED/2, Params.SENSOR_DIST + Params.TILE_LENGTH/2);
+      odo.setXYT((bridgePosition[0]) * Params.TILE_LENGTH, 
+                 (bridgePosition[1]) * Params.TILE_LENGTH, 
+                  bridgePosition[2]);
       return true;
       
   }

@@ -91,8 +91,9 @@ public class InitTask implements Task {
     }
     
     private int getTeamColor(Map data){
-      int team = ((long)data.get("RedTeam") == Params.TEAM_ID) ? 
-                     TaskManager.TEAM_RED : TaskManager.TEAM_GREEN;
+      // TODO: This throws a error when green team is not given
+      int team = ((long)data.get("GreenTeam") == Params.TEAM_ID) ? 
+                     TaskManager.TEAM_GREEN : TaskManager.TEAM_RED;
       return team;
     }
     
@@ -119,6 +120,7 @@ public class InitTask implements Task {
                                                     (int)((long)data.get("TN_UR_y")));
         
         CrossBridgeTask crossBridge = new CrossBridgeTask(nav);
+        CrossTunnelTask crossTunnel = new CrossTunnelTask(nav, sp);
         
         
         

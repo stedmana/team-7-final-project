@@ -24,16 +24,16 @@ public class Main {
   }
   
   public static void main(String[] args) {
-    Task iTask = new InitTask("192.168.2.5", Params.TEAM_ID, Params.debugCompetitionParams, true);
-    
-    TaskManager t = TaskManager.get();
-    getKillThread().start();
-    
-    // Start init task
-    t.setDebugTaskOrder(INIT);
-    t.registerTask(TaskManager.TaskType.INIT, iTask, 10000);
-    t.start();
-    Button.waitForAnyPress();
+      Task iTask = new InitTask(Params.SERVER_IP, Params.TEAM_ID, null, false);
+      
+      TaskManager t = TaskManager.get();
+      getKillThread().start();
+      
+      // Start init task
+      t.setDebugTaskOrder(INIT);
+      t.registerTask(TaskManager.TaskType.INIT, iTask, 10000);
+      t.start();
+      Button.waitForAnyPress();
   }
 
 }

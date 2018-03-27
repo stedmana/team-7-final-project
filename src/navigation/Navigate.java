@@ -8,6 +8,64 @@ import lejos.robotics.SampleProvider;
 import main.Params;
 
 public class Navigate {
+    
+    public class PIController implements Runnable{
+        final static int I_MAX = 5;
+        final int defaultSpeed;
+        double current_error;
+        double K_p;
+        double K_i;
+        
+        double integrator;
+        
+        double lastTime = 0;
+        
+        boolean _stop = true;
+        public PIController(double K_p, double K_i, int defaultSpeed) {
+            this.current_error = 0;
+            this.integrator = 0;
+            this.defaultSpeed = defaultSpeed;
+        }
+        
+        @Override
+        public void run() {
+            _stop = false;
+            this.lastTime = System.currentTimeMillis();
+            while(!_stop) {
+                if(current_error > 0) {
+                    leftMotor.setSpeed(defaultSpeed+50);
+                    rightMotor.setSpeed(defaultSpeed);
+                } else if (current_error < 0) {
+                    leftMotor.setSpeed(defaultSpeed);
+                    rightMotor.setSpeed(defaultSpeed+50);
+                } else {
+                    leftMotor.setSpeed(defaultSpeed);
+                    leftMotor.setSpeed(defaultSpeed);
+                }
+                if(!(leftMotor.isMoving() && rightMotor.isMoving()))
+                    _stop = true;
+            }
+        }
+        
+        public void stop() {
+            _stop = true;
+        }
+        
+        public void set_error(double error) {
+            this.current_error = error;
+            update_integrator(error, (System.currentTimeMillis() - lastTime)/1000);
+            this.lastTime = System.currentTimeMillis();
+        }
+
+        private void update_integrator(double error, double dt) {
+            if(this.integrator <= I_MAX)
+                this.integrator += dt * error;
+        }
+
+        public boolean isStopped() {
+            return _stop;
+        }
+    }
   
 	private static final int DIR_X = 0;
     private static final int DIR_Y = 1;
@@ -165,8 +223,9 @@ public class Navigate {
   	  leftMotor.stop(true);
   	  rightMotor.stop(false);
   	  double remainingDist = (goal - odo.getXYT()[direction]); // dead reckon the remaining amount
-  	  if(remainingDist > 0) 
-  		  remainingDist = (Params.TILE_LENGTH-Params.SENSOR_DIST)/2; 
+  	  if((remainingDist > 0 && distance > 0) ||
+  	     (remainingDist < 0 && distance < 0)) 
+  		  remainingDist = (Params.TILE_LENGTH)/2 - Params.SENSOR_DIST; 
   	  else
   		  remainingDist = 0;
   	  goForward(Params.SPEED, remainingDist);
@@ -490,6 +549,29 @@ public class Navigate {
 	    rightMotor.rotate(wheelRotations, false);
 	    leftMotor.setSpeed(Params.SPEED);
         rightMotor.setSpeed(Params.SPEED);
+	}
+	
+	/**
+	 * Travel with angle correction.
+	 * @param speed - Initial speed to go to the forward motors.
+	 * @param d - The distance to go.
+	 * @param e - The amount of distance to go before starting the controller
+	 * @return 
+	 * @return PIController - a controller object to send the distance parameters to.
+	 */
+	public PIController PITraveller(float speed, double d, double e) {
+	    
+	    int wheelRotations = (int) ((e*180)/(Math.PI*Params.WHEEL_RAD));
+	    leftMotor.rotate(wheelRotations, true);
+	    rightMotor.rotate(wheelRotations, false);
+	    
+	    wheelRotations = (int) ((d*180)/(Math.PI*Params.WHEEL_RAD));
+	    leftMotor.rotate(wheelRotations, true);
+	    leftMotor.rotate(wheelRotations, true);
+	    PIController controller = new PIController(0.6, 3, (int) speed);
+	    Thread controlThread = new Thread(controller);
+	    controlThread.start();
+	    return controller;
 	}
 	
 	/**

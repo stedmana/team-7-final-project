@@ -44,8 +44,8 @@ public class Localization implements Task{
     @Override
     public boolean start(boolean prevTaskSuccess) {
       	usLocalize();
-      	odometer.setTheta(0);
       	navigate.squareUp();
+      	odometer.setTheta(0);
       	Sound.beep();
       	navigate.goForward(100, Params.SENSOR_DIST);
       	navigate.turnTo(90);
