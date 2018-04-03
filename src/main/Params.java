@@ -16,6 +16,7 @@ public class Params {
     final public static int SPEED = 200; // deg/sec
     final public static int TURN_SPEED = 100; // deg/sec
     final public static int ACCEL = 800; // deg/sec/sec
+    final public static int SEARCH_THRESHOLD = 80;
     final public static double TILE_LENGTH = 30.48; // cm
     final public static double DIFF_THRESHOLD = -0.2; //change in units per sample
     final public static int TEAM_ID = 7;

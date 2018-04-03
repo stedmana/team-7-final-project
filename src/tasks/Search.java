@@ -4,6 +4,7 @@ import odometer.*;
 import lejos.hardware.Sound;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.robotics.SampleProvider;
+import main.Params;
 import ca.mcgill.ecse211.detectColor.*;
 import fsm.Task;
 
@@ -106,19 +107,23 @@ public class Search implements Task {
 	float data[] = new float[ultraSonic.sampleSize()];
 	int i = 0;
 		
+		//might be completed by previous task
+		nav.travelTo(llx, lly, 90, false);
+	
+		//travel along bottom of search area
 		nav.travelTo(urx, lly, 0, true);
-		
 		while(leftMotor.isMoving() && rightMotor.isMoving()) {
 			ultraSonic.fetchSample(data, 0);
-			if(data[0] <= 80) {
-				blocks[i] = (float)odo.getXYT()[0];
-				blocks[i+1] = data[0] + (float)odo.getXYT()[1];
+			if(data[0] <= Params.SEARCH_THRESHOLD) {
+				blocks[i] = (float)odo.getXYT()[0]; //stores x coordinate of block
+				blocks[i+1] = data[0] + (float)odo.getXYT()[1]; // stores approximate y coordinate of block
 				i += 2;
 				//so a block will take up two spaces in the array - the first space for the x-Position, second 
 				//for the y-Position
 			}
 		}
 		
+		//travel up from bottom right corner
 		nav.travelTo(urx, ury, 0, true);
 		while(leftMotor.isMoving() && rightMotor.isMoving()) {
 			ultraSonic.fetchSample(data, 0);
@@ -174,26 +179,24 @@ public class Search implements Task {
 			if(blocks[i] == 0 && blocks[i+1] == 0) { //the only way both values will be 0 is if there are no more blocks recorded
 				break; //or return..??
 			}
-			nav.travelTo((double)blocks[i], (double)blocks[i+1], 0, false);
-			//insert colour detection here!!!
-			while(leftMotor.isMoving() && rightMotor.isMoving()) {
-				ultraSonic.fetchSample(data, 0);
-				if(data[0] <= 15) { //do we have an ultrasonic sensor to detect the block?
-					colour = col.detectC();
-					try {
-						Thread.sleep(500); //to allow the colour detection to be accurate
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				colour = col.detectC();
-				break;
-				}
-			} if(colour == targetColour) {
+			
+			
+			nav.travelTo((double)blocks[i], (double)blocks[i+1], 0, false); //TODO: include offset so robot does not drive into block
+			
+				
+			colour = col.detectC();
+			try {
+				Thread.sleep(500); //to allow the colour detection to be accurate
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		
+			if(colour == targetColour) {
 				Sound.beep();
 				Sound.beep();
 				Sound.beep();
-				val = 1;
+				val = 1; //TODO: change to bool
 			}
 		}
 	return val;
