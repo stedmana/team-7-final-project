@@ -27,6 +27,7 @@ import main.Params;
 import navigation.Navigate;
 import odometer.Odometer;
 import odometer.OdometerExceptions;
+import ca.mcgill.ecse211.detectColor.*;
 
 
 public class InitTask implements Task {
@@ -37,6 +38,7 @@ public class InitTask implements Task {
         new EV3ColorSensor(LocalEV3.get().getPort("S3"));
     SampleProvider lSampleProv = leftColorSensor.getRedMode();
     SampleProvider rSampleProv = rightColorSensor.getRedMode();
+    DetectColor color = new DetectColor();
   
     // Ultrasonic sensor
     EV3UltrasonicSensor usSensor = new EV3UltrasonicSensor(LocalEV3.get().getPort("S2"));
@@ -121,6 +123,9 @@ public class InitTask implements Task {
         
         CrossBridgeTask crossBridge = new CrossBridgeTask(nav);
         CrossTunnelTask crossTunnel = new CrossTunnelTask(nav, sp);
+        final Search search = new Search(color.getColorSensor(), nav.getOdo(), nav, nav.getLeftMotor(),
+        		nav.getRightMotor(), nav.getSampleLeft(), nav.getSampleRight(), color, 2, (int)((long)data.get("TN_LL_x"),
+        				(int)((long)data.get("TN_LL_x"), (int)((long)data.get("TN_LL_x"), (int)((long)data.get("TN_LL_x"));
         
         
         

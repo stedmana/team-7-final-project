@@ -45,5 +45,15 @@ public class Params {
         debugCompetitionParams.put("BR_LL_y", (long) 3);
         debugCompetitionParams.put("BR_UR_x", (long) 6);
         debugCompetitionParams.put("BR_UR_y", (long) 5);
+        
+        debugCompetitionParams.put("SR_LL_x", (long) 1);
+        debugCompetitionParams.put("SR_LL_y", (long) 6);
+        debugCompetitionParams.put("SR_UR_x", (long) 2);
+        debugCompetitionParams.put("SR_UR_y", (long) 8);
+        
+        debugCompetitionParams.put("SG_LL_x", (long) 0);
+        debugCompetitionParams.put("SG_LL_y", (long) 0);
+        debugCompetitionParams.put("SG_UR_x", (long) 2);
+        debugCompetitionParams.put("SG_UR_y", (long) 2);
     }
 }

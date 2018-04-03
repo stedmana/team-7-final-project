@@ -7,7 +7,7 @@ import lejos.hardware.ev3.LocalEV3;
 
 public class DetectColor {
 
-	static EV3ColorSensor cs = new EV3ColorSensor(LocalEV3.get().getPort("S4"));
+	static EV3ColorSensor cs = new EV3ColorSensor(LocalEV3.get().getPort("S1"));
 	private static double[] meanBlue = new double[3];
 	private static double[] meanRed = new double[3];
 	private static double[] meanWhite = new double[3];
@@ -146,7 +146,7 @@ public class DetectColor {
 				lcd.drawString("< Object Detected >", 0, 5);
 				lcd.drawString("< Blue            >", 0, 6);
 
-				c = 1;
+				c = 2;
 			
 			} else if(!(rSampleDist > rMeanDist + 2*rStandDist) && !(rSampleDist < rMeanDist - 2*rStandDist)) {
 				//its probably red
@@ -156,7 +156,7 @@ public class DetectColor {
 				lcd.drawString("< Object Detected >", 0, 5);
 				lcd.drawString("< Red             >", 0, 6);
 
-				c = 2;
+				c = 1;
 				
 			} else if(!(ySampleDist > yMeanDist + 2*yStandDist) && !(ySampleDist < yMeanDist - 2*yStandDist)) {
 				//its probably yellow
@@ -192,5 +192,9 @@ public class DetectColor {
 		return c;
 
 	}
+	
+	public EV3ColorSensor getColorSensor() {
+		return this.cs;
+	} 
 
 }

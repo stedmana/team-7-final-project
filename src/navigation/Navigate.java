@@ -575,6 +575,26 @@ public class Navigate {
 	    return controller;
 	}
 	
+	public EV3LargeRegulatedMotor getLeftMotor() {
+		return this.leftMotor;
+	}
+	
+	public EV3LargeRegulatedMotor getRightMotor() {
+		return this.rightMotor;
+	}
+	
+	public SampleProvider getSampleLeft() {
+		return leftLightVal;
+	}
+	
+	public SampleProvider getSampleRight() {
+		return rightLightVal;
+	}
+	
+	public Odometer getOdo() {
+		return this.odo;
+	}
+	
 	/**
 	 * Stop both motors rotation.
 	 */

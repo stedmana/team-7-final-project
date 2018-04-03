@@ -36,6 +36,9 @@ public class Search implements Task {
 	
 	boolean taskSuccess;
 	
+	SampleProvider left;
+	SampleProvider right;
+	
 	/**
 	 * Creates the search class, which enables the robot to createa 2-d map of the search area,
 	 * with all blocks included within it
@@ -59,8 +62,8 @@ public class Search implements Task {
 	 *  colour of the object (blue = 1, red = 2, yellow = 3, white = 4)
 	 * */
 	
-	public Search(SampleProvider ultraSonic, Odometer odo, Navigate nav, double llx, double lly, double urx, double ury,
-			EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, DetectColor col, int targetColour) {
+	public Search(SampleProvider ultraSonic, Odometer odo, Navigate nav, EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, 
+			SampleProvider left, SampleProvider right, DetectColor col, int targetColor, double llx, double lly, double urx, double ury) {
 		
 		
 		this.llx = llx;
@@ -86,6 +89,9 @@ public class Search implements Task {
 		outOfTime = false;
 		
 		this.targetColour = targetColour;
+		
+		this.left = left;
+		this.right = right;
 			
 	}
 	
@@ -101,6 +107,7 @@ public class Search implements Task {
 	int i = 0;
 		
 		nav.travelTo(urx, lly, 0, true);
+		
 		while(leftMotor.isMoving() && rightMotor.isMoving()) {
 			ultraSonic.fetchSample(data, 0);
 			if(data[0] <= 80) {
