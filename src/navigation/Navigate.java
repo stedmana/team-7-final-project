@@ -213,7 +213,7 @@ public class Navigate {
                   pos[direction] = ((int)(pos[direction] - 5) / Params.TILE_LENGTH)*Params.TILE_LENGTH;
               
               //start robot moving again
-              goForward(100, Params.SENSOR_DIST);
+              goForward(100, Params.SENSOR_DIST_L, Params.SENSOR_DIST_R);
               
               odo.setXYT(pos[0], pos[1], pos[2]);
               rightMotor.forward();
@@ -551,6 +551,17 @@ public class Navigate {
 	    leftMotor.setSpeed(Params.SPEED);
         rightMotor.setSpeed(Params.SPEED);
 	}
+	
+	public void goForward(int speed, double distanceLeft, double distanceRight)
+    {
+        double wheelRotationsCoeff = (180/(Math.PI*Params.WHEEL_RAD));
+        leftMotor.setSpeed(speed);
+        rightMotor.setSpeed(speed);
+        leftMotor.rotate((int) (wheelRotationsCoeff*distanceLeft), true);
+        rightMotor.rotate((int) (wheelRotationsCoeff*distanceRight), false);
+        leftMotor.setSpeed(Params.SPEED);
+        rightMotor.setSpeed(Params.SPEED);
+    }
 	
 	/**
 	 * Travel with angle correction.

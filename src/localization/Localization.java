@@ -47,12 +47,12 @@ public class Localization implements Task{
       	navigate.squareUp();
       	odometer.setTheta(0);
       	Sound.beep();
-      	navigate.goForward(100, Params.SENSOR_DIST);
+      	navigate.goForward(100, Params.SENSOR_DIST_L, Params.SENSOR_DIST_R);
       	navigate.turnTo(90);
       	
       	navigate.squareUp();
       	Sound.beep();
-      	navigate.goForward(100, Params.SENSOR_DIST);
+      	navigate.goForward(100, Params.SENSOR_DIST_L, Params.SENSOR_DIST_R);
       	odometer.setXYT(Params.cornerParams[corner][0], 
       	                Params.cornerParams[corner][1], 
       	                Params.cornerParams[corner][2]);
@@ -88,7 +88,7 @@ public class Localization implements Task{
 		}
 
 		D = minDist * 100 + 9;
-		K = D / 3.5;
+		K = D / 3;
 		
 		odometer.setX(minDist * 100 + 5);
 		odometer.setY(minDist * 100 + 5);
