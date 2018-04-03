@@ -24,7 +24,7 @@ public class Main {
   }
   
   public static void main(String[] args) {
-      Task iTask = new InitTask(Params.SERVER_IP, Params.TEAM_ID, null, false);
+      Task iTask = new InitTask(Params.SERVER_IP, Params.TEAM_ID, Params.debugCompetitionParams, false);
       
       TaskManager t = TaskManager.get();
       getKillThread().start();

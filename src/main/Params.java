@@ -36,10 +36,10 @@ public class Params {
     {
         debugCompetitionParams = new HashMap<String, Long>();
         debugCompetitionParams.put("GreenTeam", (long) TEAM_ID);
-        debugCompetitionParams.put("GreenCorner", (long) 0);
-        debugCompetitionParams.put("TN_LL_x", (long) 3);
+        debugCompetitionParams.put("GreenCorner", (long) 1);
+        debugCompetitionParams.put("TN_LL_x", (long) 2);
         debugCompetitionParams.put("TN_LL_y", (long) 3);
-        debugCompetitionParams.put("TN_UR_x", (long) 4);
+        debugCompetitionParams.put("TN_UR_x", (long) 3);
         debugCompetitionParams.put("TN_UR_y", (long) 5);
         debugCompetitionParams.put("BR_LL_x", (long) 5);
         debugCompetitionParams.put("BR_LL_y", (long) 3);

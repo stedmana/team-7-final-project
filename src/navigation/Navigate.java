@@ -211,10 +211,11 @@ public class Navigate {
                   pos[direction] = ((int)(pos[direction] + 5) / Params.TILE_LENGTH)*Params.TILE_LENGTH;
               else
                   pos[direction] = ((int)(pos[direction] - 5) / Params.TILE_LENGTH)*Params.TILE_LENGTH;
-              odo.setXYT(pos[0], pos[1], pos[2]);
               
               //start robot moving again
               goForward(100, Params.SENSOR_DIST);
+              
+              odo.setXYT(pos[0], pos[1], pos[2]);
               rightMotor.forward();
               leftMotor.forward();
           }
