@@ -100,39 +100,39 @@ public class Search implements Task {
 	float data[] = new float[ultraSonic.sampleSize()];
 	int i = 0;
 		
-		nav.travelTo(urx, odo.getXYT()[1], true);
+		nav.travelTo(urx, lly, 0, true);
 		while(leftMotor.isMoving() && rightMotor.isMoving()) {
 			ultraSonic.fetchSample(data, 0);
 			if(data[0] <= 80) {
 				blocks[i] = (float)odo.getXYT()[0];
 				blocks[i+1] = data[0] + (float)odo.getXYT()[1];
-				i++;
+				i += 2;
 				//so a block will take up two spaces in the array - the first space for the x-Position, second 
 				//for the y-Position
 			}
 		}
 		
-		nav.travelTo(odo.getXYT()[0], ury, true);
+		nav.travelTo(urx, ury, 0, true);
 		while(leftMotor.isMoving() && rightMotor.isMoving()) {
 			ultraSonic.fetchSample(data, 0);
 			if(data[0] <= 80) { //maybe lower the max distance before disregarding distance
 				blocks[i] = data[0] + (float)odo.getXYT()[0];
 				blocks[i+1] = (float)odo.getXYT()[1];
-				i++;
+				i += 2;
 			}
 		}
 		
-		nav.travelTo(llx, odo.getXYT()[2], true);
+		nav.travelTo(llx, ury, 0, true);
 		while(leftMotor.isMoving() && rightMotor.isMoving()) {
 			ultraSonic.fetchSample(data, 0);
 			if(data[0] <= 80) { //maybe lower the max distance before disregarding distance
 				blocks[i] = (float)odo.getXYT()[0];
 				blocks[i+1] = data[0] + (float)odo.getXYT()[1];
-				i++;
+				i += 2;
 			}
 		}
 		
-		nav.travelTo(odo.getXYT()[0], lly, true);
+		nav.travelTo(llx, lly, 0, true);
 		while(leftMotor.isMoving() && rightMotor.isMoving()) {
 			ultraSonic.fetchSample(data, 0);
 			if(data[0] <= 80) { //maybe lower the max distance before disregarding distance
@@ -167,7 +167,7 @@ public class Search implements Task {
 			if(blocks[i] == 0 && blocks[i+1] == 0) { //the only way both values will be 0 is if there are no more blocks recorded
 				break; //or return..??
 			}
-			nav.travelTo((double)blocks[i], (double)blocks[i+1], false);
+			nav.travelTo((double)blocks[i], (double)blocks[i+1], 0, false);
 			//insert colour detection here!!!
 			while(leftMotor.isMoving() && rightMotor.isMoving()) {
 				ultraSonic.fetchSample(data, 0);
