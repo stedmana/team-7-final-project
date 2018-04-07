@@ -9,6 +9,10 @@ import main.Params;
 import navigation.Navigate;
 import odometer.Odometer;
 
+/**
+ * Localization class is used at the beginning of the course to localize the robot's heading
+ * angle and cartesian coordinates to then be forced onto the odometer.
+ */
 public class Localization implements Task{
     
   
@@ -23,7 +27,7 @@ public class Localization implements Task{
     
 
     /**
-     * Creates a localization object
+     * Creates a localization object.
      * 
      * @param sensor sensor to record distance with
      * @param n reference to navigate object
@@ -101,7 +105,8 @@ public class Localization implements Task{
 	}
     
     /**
-     * 
+     * Orients the robot theta heading using the ultrasonic sensor. Rotates in multiple directions and uses the
+     * falling edge method to determine the correct 0 heading. 
      */
     public void usLocalize() {
 
@@ -226,7 +231,7 @@ public class Localization implements Task{
 		}
 
 		// Turn to 0.
-		navigate.turnTo(middleTheta - 45 - 90);
+		navigate.turnTo(middleTheta - 45 - 90); // minus 90 due to placement of US sensor
 		odometer.setXYT(Params.cornerParams[corner][0], Params.cornerParams[corner][1], Params.cornerParams[corner][2]);		
 		
 	}

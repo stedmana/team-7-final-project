@@ -12,6 +12,11 @@ package odometer;
 
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
+/**
+ * Odometer class used by navigation and localization to establish and then keep track
+ * of the robot cartesian coordinates on the playing field, as well as the robot heading.
+ * 
+ */
 public class Odometer extends OdometerData implements Runnable {
 
   private OdometerData odoData;
@@ -65,6 +70,7 @@ public class Odometer extends OdometerData implements Runnable {
 
   /**
    * This method is meant to ensure only one instance of odometer is used throughout the code.
+   * 
    * @param leftMotor left motor of robot
    * @param rightMotor right motor of robot
    * @param TRACK seperation of robots wheels 
@@ -84,8 +90,8 @@ public class Odometer extends OdometerData implements Runnable {
   }
 
   /**
-   * This class is meant to return the existing Odometer Object. It is meant to be used only if an
-   * odometer object has been created
+   * This method is meant to return the existing Odometer Object. It is meant to be used only if an
+   * odometer object has been created. 
    * 
    * @return error if no previous odometer exists
    * @throws OdometerExceptions exception thrown
