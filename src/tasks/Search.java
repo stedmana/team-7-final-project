@@ -8,6 +8,14 @@ import main.Params;
 import ca.mcgill.ecse211.detectColor.*;
 import fsm.Task;
 
+/**
+ * The search class is used to search for coloured blocks within the defined search area. 
+ * The search algorithm first traverses the outside of the search area while scanning inwards
+ * with the ultrasonic sensor to create a 2D map of the blocks in space. After, the robot navigates
+ * to the block positions indicated in the 2D map, and scanning each block with a colour sensor. This task
+ * is time-restricted, and will abort if the search takes too long.
+ *
+ */
 public class Search implements Task {
 	
 	private static double llx;
@@ -43,7 +51,8 @@ public class Search implements Task {
 	SampleProvider right;
 	
 	/**
-	 * Creates the search class, which enables the robot to create a 2d map of the search area, with all block defined within it
+	 * Constructor for the search class
+	 * 
 	 * @param ultraSonic the ultrasonic sensor
 	 * @param odo the odometer object
 	 * @param nav the navigation object
@@ -96,7 +105,11 @@ public class Search implements Task {
 	
 	/**
 	 *Enables the robot to travel to each corner of the search area,
-	 *and then probe for blocks afterwards */
+	 *and then probe for blocks afterwards 
+	 *
+	 *@param prevTaskSuccess
+	 *@return boolean if task is successful
+	 */
 	public boolean start(boolean prevTaskSuccess) {
 		
 		taskSuccess = false;
@@ -157,17 +170,11 @@ public class Search implements Task {
 		return taskSuccess;
 	}
 	
-	
 	/**
-	 * Drives to each object saved in the 2-d map, in order to identify colour
-	 * @param targetColour - an int corresponding to a blue, red, yellow or white block
+	 * Drives to each object saved in the 2d map, in order to identify colour.
 	 * 
-	 * 
-	 * */
-	/**
-	 * Drives to each object saved in the 2d map, in order to identify colour
 	 * @param targetColour an int corresponding to a blue, red, yellow or white black
-	 * @return
+	 * @return int indicating if the target colour was found: 0 = false, 1 = true.
 	 */
 	public int probe(int targetColour) { //have color detection running in the background
 		

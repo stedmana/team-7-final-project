@@ -6,6 +6,11 @@ import navigation.Navigate;
 import odometer.Odometer;
 import odometer.OdometerExceptions;
 
+/**
+ * Task is invoked after navigating to the start of the bridge. Includes theta correction, 
+ * driving straight across the bridge speedbumps, and a final correction on the other side. 
+ *
+ */
 public class CrossBridgeTask implements Task {
   
     Navigate nav = null;

@@ -108,6 +108,7 @@ public class Odometer extends OdometerData implements Runnable {
    * This method is where the logic for the odometer will run. Use the methods provided from the
    * OdometerData class to implement the odometer.
    */
+  
   // run method (required for Thread)
   public void run() {
     long updateStart, updateEnd;
