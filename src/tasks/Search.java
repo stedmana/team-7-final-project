@@ -27,6 +27,8 @@ public class Search implements Task {
 	private double xDiff;
 	private double yDiff;
 	
+	private double senseDiff;
+	
 	private static Odometer odo;
 	
 	DetectColor col;
@@ -93,6 +95,8 @@ public class Search implements Task {
 		
 		this.left = left;
 		this.right = right;
+		
+		this.senseDiff = (urx - llx)*Params.TILE_LENGTH;
 			
 	}
 	
@@ -103,56 +107,53 @@ public class Search implements Task {
 	public boolean start(boolean prevTaskSuccess) {
 		
 		taskSuccess = false;
+		double prevOdoValx;
+		double prevOdoValy;
 		
 	float data[] = new float[ultraSonic.sampleSize()];
 	int i = 0;
 		
 		//might be completed by previous task
-		nav.travelTo(llx, lly, 90, false);
+		nav.travelTo(llx, lly, 90, true);
 	
 		//travel along bottom of search area
-		nav.travelTo(urx, lly, 0, true);
-		while(leftMotor.isMoving() && rightMotor.isMoving()) {
+		
+		while(odo.getXYT()[0] != urx) {
+			nav.travelTo(urx, lly, 0, true);
+			prevOdoValx = odo.getXYT()[0];
+			double odoDiffx = odo.getXYT()[0] - prevOdoValx;
+			
 			ultraSonic.fetchSample(data, 0);
-			if(data[0] <= Params.SEARCH_THRESHOLD) {
+			if((data[0] <= Params.SEARCH_THRESHOLD) && (odoDiffx >= 7)) {
+				Sound.beep();
 				blocks[i] = (float)odo.getXYT()[0]; //stores x coordinate of block
 				blocks[i+1] = data[0] + (float)odo.getXYT()[1]; // stores approximate y coordinate of block
 				i += 2;
+				//hopefully will pause the ultrasonic controller while keeping the motors rolling
 				//so a block will take up two spaces in the array - the first space for the x-Position, second 
 				//for the y-Position
 			}
 		}
 		
+		
 		//travel up from bottom right corner
-		nav.travelTo(urx, ury, 0, true);
-		while(leftMotor.isMoving() && rightMotor.isMoving()) {
+		while(odo.getXYT()[1] != ury) {
+			prevOdoValy = odo.getXYT()[1];
+			double odoDiffy = odo.getXYT()[1] - prevOdoValy;
+			
+			nav.travelTo(urx, ury, 270, true);
 			ultraSonic.fetchSample(data, 0);
-			if(data[0] <= 80) { //maybe lower the max distance before disregarding distance
+			if((data[0] <= senseDiff) && (odoDiffy >= 7)) {
+				Sound.beep();
 				blocks[i] = data[0] + (float)odo.getXYT()[0];
 				blocks[i+1] = (float)odo.getXYT()[1];
 				i += 2;
 			}
 		}
-		
-		nav.travelTo(llx, ury, 0, true);
 		while(leftMotor.isMoving() && rightMotor.isMoving()) {
-			ultraSonic.fetchSample(data, 0);
-			if(data[0] <= 80) { //maybe lower the max distance before disregarding distance
-				blocks[i] = (float)odo.getXYT()[0];
-				blocks[i+1] = data[0] + (float)odo.getXYT()[1];
-				i += 2;
-			}
+			
 		}
 		
-		nav.travelTo(llx, lly, 0, true);
-		while(leftMotor.isMoving() && rightMotor.isMoving()) {
-			ultraSonic.fetchSample(data, 0);
-			if(data[0] <= 80) { //maybe lower the max distance before disregarding distance
-				blocks[i] = data[0] + (float)odo.getXYT()[0];
-				blocks[i+1] = (float)odo.getXYT()[1];
-				i += 2;
-			}
-		}
 		
 		int val = probe(targetColour);
 		if(val == 1) {
@@ -178,11 +179,25 @@ public class Search implements Task {
 		for(int i = 0; i < 8; i += 2) {
 			if(blocks[i] == 0 && blocks[i+1] == 0) { //the only way both values will be 0 is if there are no more blocks recorded
 				break; //or return..??
+			} else if(blocks[i] == 0.0f) { //assuming they're in a row, so x is 0; use blocks[i-1] and blocks[i-2]
+				int j = i;
+				int temp = 1; //start at one so no issue with incrementing it after loop
+				while(blocks[j+2] == 0) {
+					temp++;
+				}
+				//ends when it finds blocks[i-2] != 0 which is what we want
+				nav.travelTo(blocks[i+(temp*2)], blocks[i+1], 0, false); //should take care of the columns case
+			} else if(blocks[i+1] == 0.0f) { //assuming they're in a column, so y is 0; 
+				int j = i;
+				int temp = 1; //start at one so no issue with incrementing it after loop
+				while(blocks[(j+1)-2] == 0) {
+					temp++;
+				}
+				nav.travelTo(blocks[(i+1)-(temp*2)], blocks[i+1], 0, false); //should take care of the columns case
+			} else { //tbh the above conditions should never happen...
+				nav.travelTo((double)blocks[i], (double)blocks[i+1], 0, false); //TODO: include offset so robot does not drive into block
+
 			}
-			
-			
-			nav.travelTo((double)blocks[i], (double)blocks[i+1], 0, false); //TODO: include offset so robot does not drive into block
-			
 				
 			colour = col.detectC();
 			try {

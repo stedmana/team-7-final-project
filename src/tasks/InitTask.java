@@ -124,8 +124,8 @@ public class InitTask implements Task {
         CrossBridgeTask crossBridge = new CrossBridgeTask(nav);
         CrossTunnelTask crossTunnel = new CrossTunnelTask(nav, sp);
         final Search search = new Search(color.getColorSensor(), nav.getOdo(), nav, nav.getLeftMotor(),
-        		nav.getRightMotor(), nav.getSampleLeft(), nav.getSampleRight(), color, 2, (int)((long)data.get("TN_LL_x"),
-        				(int)((long)data.get("TN_LL_x"), (int)((long)data.get("TN_LL_x"), (int)((long)data.get("TN_LL_x"));
+        		nav.getRightMotor(), nav.getSampleLeft(), nav.getSampleRight(), color, 2, (int)((long)data.get("SR_LL_x")),
+        				(int)((long)data.get("SR_LL_y")), (int)((long)data.get("SR_UR_x")), (int)((long)data.get("SR_UR_y")));
         
         
         
@@ -139,11 +139,12 @@ public class InitTask implements Task {
         tm.registerTask(TaskType.NAV_TO_TUNNEL, navToTunnel, 0);
         
         taskMap.put(TaskType.NAV_TO_HOME, null);
-        taskMap.put(TaskType.SEARCH, null);
+        taskMap.put(TaskType.SEARCH, search);
         
         
         tm.registerTask(TaskType.CROSS_BRIDGE, crossBridge, 0);
         tm.registerTask(TaskType.CROSS_TUNNEL, crossBridge, 0);
+        tm.registerTask(TaskType.SEARCH, search, 60);
         tm.registerTask(TaskType.NAV_TO_HOME, new Task() {
 
           @Override

@@ -9,7 +9,7 @@ public class Params {
      * that will not change. i.e descriptions about our hardware, regular constants like speed
      * etc. Put units beside each value.
      */
-    final public static String SERVER_IP = "192.168.2.3";
+    final public static String SERVER_IP = "192.168.2.39";
     final public static double TRACK = 10.7; // cm
     final public static double WHEEL_RAD = 1.6; // cm
     final public static double SENSOR_DIST = 4.5; // cm
@@ -48,13 +48,13 @@ public class Params {
         debugCompetitionParams.put("BR_UR_y", (long) 5);
         
         debugCompetitionParams.put("SR_LL_x", (long) 1);
-        debugCompetitionParams.put("SR_LL_y", (long) 6);
+        debugCompetitionParams.put("SR_LL_y", (long) 4);
         debugCompetitionParams.put("SR_UR_x", (long) 2);
-        debugCompetitionParams.put("SR_UR_y", (long) 8);
+        debugCompetitionParams.put("SR_UR_y", (long) 6);
         
-        debugCompetitionParams.put("SG_LL_x", (long) 0);
-        debugCompetitionParams.put("SG_LL_y", (long) 0);
-        debugCompetitionParams.put("SG_UR_x", (long) 2);
+        debugCompetitionParams.put("SG_LL_x", (long) 4);
+        debugCompetitionParams.put("SG_LL_y", (long) 1);
+        debugCompetitionParams.put("SG_UR_x", (long) 6);
         debugCompetitionParams.put("SG_UR_y", (long) 2);
     }
 }
