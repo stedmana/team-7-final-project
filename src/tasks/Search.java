@@ -43,28 +43,21 @@ public class Search implements Task {
 	SampleProvider right;
 	
 	/**
-	 * Creates the search class, which enables the robot to createa 2-d map of the search area,
-	 * with all blocks included within it
-	 * @param ultraSonic - the ultrasonic sensor
-	 * 
-	 * @param odo - the odometer object
-	 * 
-	 * @param nav - the navigation object
-	 * 
-	 * @param llx - x position on the grid of the lower left corner of the search area
-	 * @param lly - y position on the grid of the lower left corner of the search area
-	 * 
-	 * @param urx - x position on the grid of the upper right corner of the search area
-	 * @param ury - y position on the grid of the upper right corner of the search area
-	 * 
-	 * @param leftMotor - the left EV3 motor
-	 * @param rightMotor - the right EV3 motor
-	 * 
-	 * @param col - a colour detection object from the detectColour package
-	 * @param targetColour - a number between 1 and 4, representing the
-	 *  colour of the object (blue = 1, red = 2, yellow = 3, white = 4)
-	 * */
-	
+	 * Creates the search class, which enables the robot to create a 2d map of the search area, with all block defined within it
+	 * @param ultraSonic the ultrasonic sensor
+	 * @param odo the odometer object
+	 * @param nav the navigation object
+	 * @param leftMotor the left motor
+	 * @param rightMotor the right motor
+	 * @param left
+	 * @param right
+	 * @param col colour detection object from detectColour package
+	 * @param targetColor a number between 1 and 4, representing the colour of the object (blue = 1, red = 2, yellow = 3, white = 4)
+	 * @param llx x position on the grid of the lower left corner of the search area
+	 * @param lly y position on the grid of the lower left corner of the search area
+	 * @param urx x position on the grid of the upper right corner of the search area
+	 * @param ury y position on the grid of the upper right corner of the search area
+	 */
 	public Search(SampleProvider ultraSonic, Odometer odo, Navigate nav, EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, 
 			SampleProvider left, SampleProvider right, DetectColor col, int targetColor, double llx, double lly, double urx, double ury) {
 		
@@ -168,7 +161,14 @@ public class Search implements Task {
 	/**
 	 * Drives to each object saved in the 2-d map, in order to identify colour
 	 * @param targetColour - an int corresponding to a blue, red, yellow or white block
+	 * 
+	 * 
 	 * */
+	/**
+	 * Drives to each object saved in the 2d map, in order to identify colour
+	 * @param targetColour an int corresponding to a blue, red, yellow or white black
+	 * @return
+	 */
 	public int probe(int targetColour) { //have color detection running in the background
 		
 		int val = 0;
