@@ -64,12 +64,13 @@ public class Odometer extends OdometerData implements Runnable {
   }
 
   /**
-   * This method is meant to ensure only one instance of the odometer is used throughout the code.
-   * 
-   * @param leftMotor
-   * @param rightMotor
-   * @return new or existing Odometer Object
-   * @throws OdometerExceptions
+   * This method is meant to ensure only one instance of odometer is used throughout the code.
+   * @param leftMotor left motor of robot
+   * @param rightMotor right motor of robot
+   * @param TRACK seperation of robots wheels 
+   * @param WHEEL_RAD radius of robots wheels
+   * @return returns new or existing Odometer Object
+   * @throws OdometerExceptions exception is thrown
    */
   public synchronized static Odometer getOdometer(EV3LargeRegulatedMotor leftMotor,
       EV3LargeRegulatedMotor rightMotor, final double TRACK, final double WHEEL_RAD)
@@ -87,6 +88,7 @@ public class Odometer extends OdometerData implements Runnable {
    * odometer object has been created
    * 
    * @return error if no previous odometer exists
+   * @throws OdometerExceptions exception thrown
    */
   public synchronized static Odometer getOdometer() throws OdometerExceptions {
 

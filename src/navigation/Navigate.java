@@ -82,11 +82,10 @@ public class Navigate {
 	
 	/**
 	 * Navigate class used for navigation
-	 * @param leftMotor
-	 * @param rightMotor
-	 * @param leftLightVal
-	 * @param rightLightVal
-	 * @throws OdometerExceptions
+	 * @param leftMotor	left motor of robot
+	 * @param rightMotor	right motor of robot
+	 * @param leftLightVal light value from left light sensor
+	 * @param rightLightVal light value from right light sensor
 	 */
 	public Navigate(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor,
 			SampleProvider leftLightVal, SampleProvider rightLightVal){
@@ -240,8 +239,8 @@ public class Navigate {
 	 * Assuming: on an intersection of two grid lines
 	 * @param x - in cartesian coordinates
 	 * @param y - in cartesian coordinates
-	 * @param pointCorrect - does odometry correction about end point if true, orients facing 0 degrees
-	 * @return
+	 * @param theta - does odometry correction about end point if true, orients facing 0 degrees
+	 * 
 	 */
 	public void diffTravelTo(double x, double y, double theta) {
 		
@@ -557,7 +556,6 @@ public class Navigate {
 	 * @param speed - Initial speed to go to the forward motors.
 	 * @param d - The distance to go.
 	 * @param e - The amount of distance to go before starting the controller
-	 * @return 
 	 * @return PIController - a controller object to send the distance parameters to.
 	 */
 	public PIController PITraveller(float speed, double d, double e) {

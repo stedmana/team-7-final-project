@@ -21,13 +21,13 @@ public class Localization implements Task{
     private static double D;
     private static double K;
     
+
     /**
-     * Creates a Localization Object
+     * Creates a localization object
      * @param sensor sensor to record distance with
-     * @param n 
-     * @param leftMotor left motor object.
-     * @param rightMotor right motor object.
-     * @throws OdometerExceptions 
+     * @param n reference to navigate object
+     * @param corner corner which the robot is in
+     * @throws OdometerExceptions the exception thrown by odometer issues
      */
     public Localization(final SampleProvider sensor,
                         Navigate n, int corner) throws OdometerExceptions
