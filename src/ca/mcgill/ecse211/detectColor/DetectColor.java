@@ -5,6 +5,11 @@ import lejos.robotics.SampleProvider;
 import lejos.hardware.lcd.TextLCD;
 import lejos.hardware.ev3.LocalEV3;
 
+/**
+ * Used by Search class to detect the colour of blocks in the search area. Implements Gaussian
+ * distribution method to detect if a block is blue, red, white, yellow. 
+ * 
+ */
 public class DetectColor {
 
 	static EV3ColorSensor cs = new EV3ColorSensor(LocalEV3.get().getPort("S1"));
@@ -14,7 +19,9 @@ public class DetectColor {
 	private static double[] meanYellow = new double[3];
 	private static TextLCD lcd; 
 
-
+	/**
+	 * Constructor of class used to set up all the calibrated values for each colour
+	 */
 	public DetectColor() {
 
 
@@ -38,7 +45,11 @@ public class DetectColor {
 
 
 	}
-
+	/**
+	 * Detects the colour of the block using the EV3 colour sensor and statistical analysis.
+	 * 
+	 * @return integer indicating colour: 1 = blue, 2 = red, 3 = yellow, 4 = white, 0 = nothing
+	 */
 	public int detectC() {
 
 		//blue = 1, red = 2, yellow = 3, white = 4, 0 = nothing
@@ -193,6 +204,9 @@ public class DetectColor {
 
 	}
 	
+	/**
+	 * @return EV3ColorSensor object for possible use
+	 */
 	public EV3ColorSensor getColorSensor() {
 		return this.cs;
 	} 

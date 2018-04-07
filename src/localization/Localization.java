@@ -24,6 +24,7 @@ public class Localization implements Task{
 
     /**
      * Creates a localization object
+     * 
      * @param sensor sensor to record distance with
      * @param n reference to navigate object
      * @param corner corner which the robot is in
@@ -59,11 +60,16 @@ public class Localization implements Task{
       	System.out.println(odometer.getXYT());
       	return true;
     }
-        
+    
+    //TODO: Does this ever get used? @murray ?
     private double nearestMultiple(double base, double num) {
     	return Math.round(num / base) * base;
     }
     
+    /**
+     * Finds the point at which the ultrasonic sensor reads the minimum distance.
+     * Used to define constants D and K to be used in ultrasonic localization.
+     */
     private void findD() {
 
 		navigate.spin(150);
@@ -94,6 +100,9 @@ public class Localization implements Task{
 		odometer.setY(minDist * 100 + 5);
 	}
     
+    /**
+     * 
+     */
     public void usLocalize() {
 
 		// Store angles at which the walls are seen.

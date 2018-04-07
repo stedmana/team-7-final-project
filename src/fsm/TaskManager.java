@@ -6,7 +6,19 @@ import lejos.hardware.Sound;
 import lejos.hardware.lcd.LCD;
 import static fsm.TaskManager.TaskType.*;
 
+/**
+ * Stores the identification and timing information associated
+ * with each task.
+ *
+ */
 class TaskInfo{
+	/**
+	 * Method that stores the values associated with managing a task, including allotted time, if it has started,
+	 * and if it has finished.
+	 * 
+	 * @param t - Task object
+	 * @param allotedTime - Time the task is allowed to run in ms
+	 */
     public TaskInfo(Task t, long allotedTime) {
         task = t;
         allotedTimeMs = allotedTime;
@@ -20,6 +32,11 @@ class TaskInfo{
     public boolean started;
 }
 
+/**
+ * Used to implement the finite state machine controlling the robot actions through setting
+ * up and ordering tasks to be implemented.
+ *
+ */
 public class TaskManager {
       /* All our tasks are represented as an enumeration because they are fixed.*/
       public enum TaskType{ 
@@ -49,6 +66,9 @@ public class TaskManager {
      
      private TaskManager() {}
      
+     /**
+      * Returns a new TaskManager object. To be used in Main to instantiate the TaskManager object.
+      */
      public static TaskManager get() {
          if(tm == null)
            tm = new TaskManager();
