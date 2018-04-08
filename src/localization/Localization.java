@@ -9,6 +9,10 @@ import main.Params;
 import navigation.Navigate;
 import odometer.Odometer;
 
+/**
+ * Localization class is used at the beginning of the course to localize the robot's heading
+ * angle and cartesian coordinates to then be forced onto the odometer.
+ */
 public class Localization implements Task{
     
   
@@ -21,13 +25,14 @@ public class Localization implements Task{
     private static double D;
     private static double K;
     
+
     /**
-     * Creates a Localization Object
+     * Creates a localization object.
+     * 
      * @param sensor sensor to record distance with
-     * @param n 
-     * @param leftMotor left motor object.
-     * @param rightMotor right motor object.
-     * @throws OdometerExceptions 
+     * @param n reference to navigate object
+     * @param corner corner which the robot is in
+     * @throws OdometerExceptions the exception thrown by odometer issues
      */
     public Localization(final SampleProvider sensor,
                         Navigate n, int corner) throws OdometerExceptions
@@ -59,11 +64,16 @@ public class Localization implements Task{
       	System.out.println(odometer.getXYT());
       	return true;
     }
-        
+    
+    //TODO: Does this ever get used? @murray ?
     private double nearestMultiple(double base, double num) {
     	return Math.round(num / base) * base;
     }
     
+    /**
+     * Finds the point at which the ultrasonic sensor reads the minimum distance.
+     * Used to define constants D and K to be used in ultrasonic localization.
+     */
     private void findD() {
 
 		navigate.spin(150);
@@ -94,6 +104,10 @@ public class Localization implements Task{
 		odometer.setY(minDist * 100 + 5);
 	}
     
+    /**
+     * Orients the robot theta heading using the ultrasonic sensor. Rotates in multiple directions and uses the
+     * falling edge method to determine the correct 0 heading. 
+     */
     public void usLocalize() {
 
 		// Store angles at which the walls are seen.
@@ -217,7 +231,7 @@ public class Localization implements Task{
 		}
 
 		// Turn to 0.
-		navigate.turnTo(middleTheta - 45 - 90);
+		navigate.turnTo(middleTheta - 45 - 90); // minus 90 due to placement of US sensor
 		odometer.setXYT(Params.cornerParams[corner][0], Params.cornerParams[corner][1], Params.cornerParams[corner][2]);		
 		
 	}

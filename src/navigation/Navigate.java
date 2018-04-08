@@ -7,8 +7,16 @@ import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.robotics.SampleProvider;
 import main.Params;
 
+/**
+ * Navigate class is used to move the robot across the playing field
+ * using the cartesian coordinate system defined. It includes methods for 
+ * navigation to new coordinates, odometry correction, and motor data.
+ * 
+ */
 public class Navigate {
     
+	
+	//TODO: is this going to be deleted?
     public class PIController implements Runnable{
         final static int I_MAX = 5;
         final int defaultSpeed;
@@ -81,12 +89,12 @@ public class Navigate {
 	private SampleProvider rightLightVal;
 	
 	/**
-	 * Navigate class used for navigation
-	 * @param leftMotor
-	 * @param rightMotor
-	 * @param leftLightVal
-	 * @param rightLightVal
-	 * @throws OdometerExceptions
+	 * Navigate object constructor
+	 * 
+	 * @param leftMotor	left motor of robot
+	 * @param rightMotor	right motor of robot
+	 * @param leftLightVal light value from left light sensor
+	 * @param rightLightVal light value from right light sensor
 	 */
 	public Navigate(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor,
 			SampleProvider leftLightVal, SampleProvider rightLightVal){
@@ -108,6 +116,10 @@ public class Navigate {
 	}
 	
 	/**
+	 * Method used to travel to a defined cartesian coordinate in the 
+	 * playing field, and finish there facing a defined heading. Odometry
+	 * correction is built in, and line sensing can be done with either a
+	 * differential or hard-coded method. 
 	 * 
 	 * @param x - cartesian x coordinate of destination
 	 * @param y - cartesian y coordinate of destination
@@ -126,7 +138,7 @@ public class Navigate {
 	}
 	
 	/**
-	 * Navigate to a given coordinate.
+	 * Navigate to a given coordinate using the hard-coded line sensing method. 
 	 * 
 	 * @param x - Navigation coordinate X in cartesian
 	 * @param y - Navigation coordinate Y in cartesian
@@ -149,6 +161,7 @@ public class Navigate {
 	
 	/**
 	 * Travels forward a distance in x or y direction correcting the robot with the lines.
+	 * Used by the navigateTo hard-coded line sensing method.
 	 * 
 	 * @param distance distance to travel
 	 * @param direction DIR_X or DIR_Y
@@ -238,10 +251,11 @@ public class Navigate {
 	 * Finishes with heading facing corresponding Y direction traversed
 	 * (eg. up = 0 degrees, down = 180 degrees)
 	 * Assuming: on an intersection of two grid lines
+	 * 
 	 * @param x - in cartesian coordinates
 	 * @param y - in cartesian coordinates
-	 * @param pointCorrect - does odometry correction about end point if true, orients facing 0 degrees
-	 * @return
+	 * @param theta - does odometry correction about end point if true, orients facing 0 degrees
+	 * 
 	 */
 	public void diffTravelTo(double x, double y, double theta) {
 		
@@ -414,17 +428,18 @@ public class Navigate {
 	}
 	
 	/**
-	 * Used to get around boolean argument of squareUp(boolean fwd)
-	 * Has no parameters
+	 * Used so a squareUp call with no arguments is defaulted to an
+	 * argument of True, which corresponds to a forward square up.
 	 */
 	public void squareUp() {
 		squareUp(true);
 	}
 	
 	/**
-	 * Allows robot to correct theta by driving forward to nearest black line
-	 * and using it to square the theta to that line
-	 * @param fwd - false = robot drives backward
+	 * Allows robot to correct theta using the nearest black line. The robot drives
+	 * forward until a sensor detects a line, and then stops the sensor's corresponding motor.
+	 * 
+	 * @param fwd - false = robot drives backward, true = robot drives forward
 	 */
 	public void squareUp(boolean fwd)
 	{
@@ -472,8 +487,9 @@ public class Navigate {
 	}
 	
 	/**
-	 * Turns the robot the minimum distance to face the desired theta heading
-	 * @param theta - in degrees
+	 * Turns the robot the minimum distance to face the desired theta heading.
+	 * 
+	 * @param theta - target angle in degrees
 	 */
 	public void turnTo(double theta) {
 
@@ -505,19 +521,31 @@ public class Navigate {
        rightMotor.setSpeed(Params.SPEED);
 	}
 	
+	/**
+	 * Used by localization to check if robot is spinning
+	 * 
+	 * @return true if left motors is spinning
+	 */
 	public boolean leftMotorSpinning()
 	{
 	    return leftMotor.isMoving();
 	}
 	
+	/**
+	 * Used by localization to check if robot is spinning
+	 * 
+	 * @return true if right motors is spinning
+	 */
 	public boolean rightMotorSpinning()
     {
         return rightMotor.isMoving();
     }
 	
 	/**
-	 *  Turns the robot 360 degrees. Useful for localization etc.
-	 *  @param speed - in degrees/sec
+	 *  Makes the robot rotate 360 degrees clockwise.
+	 *  Used in localization procedure.
+	 *  
+	 *  @param speed - in degrees/second
 	 */
 	public void spin(int speed)
 	{
@@ -528,6 +556,12 @@ public class Navigate {
         rightMotor.rotate((int)-rotation, true);
 	}
 	
+	/**
+	 *  Makes the robot rotate 360 degrees counter-clockwise.
+	 *  Used in localization procedure.
+	 *  
+	 *  @param speed - in degrees/second
+	 */
 	public void spinLeft(int speed) {
 		double rotation = (Params.TRACK * 180/ Params.WHEEL_RAD);
         leftMotor.setSpeed(speed);
@@ -537,9 +571,10 @@ public class Navigate {
 	}
 	
 	/**
-     *  Raw part of travel to, robot will travel forward by the given amount.
-     *  @param speed - in degrees/sec
-     *  @param distance - in cm
+     *  Robot will travel forward by the given amount.
+     *  
+     *  @param speed - in degrees/second
+     *  @param distance - in centimeters
      */
 	public void goForward(int speed, double distance)
 	{
@@ -554,10 +589,10 @@ public class Navigate {
 	
 	/**
 	 * Travel with angle correction.
+	 * 
 	 * @param speed - Initial speed to go to the forward motors.
 	 * @param d - The distance to go.
 	 * @param e - The amount of distance to go before starting the controller
-	 * @return 
 	 * @return PIController - a controller object to send the distance parameters to.
 	 */
 	public PIController PITraveller(float speed, double d, double e) {
@@ -575,22 +610,47 @@ public class Navigate {
 	    return controller;
 	}
 	
+	/**
+	 * Get left motor object
+	 * 
+	 * @return left motor object
+	 */
 	public EV3LargeRegulatedMotor getLeftMotor() {
 		return this.leftMotor;
 	}
 	
+	/**
+	 * Get right motor object
+	 * 
+	 * @return right motor object
+	 */
 	public EV3LargeRegulatedMotor getRightMotor() {
 		return this.rightMotor;
 	}
 	
+	/**
+	 * Get left sample provider for left light sensor.
+	 * 
+	 * @return left light sensor sample provider
+	 */
 	public SampleProvider getSampleLeft() {
 		return leftLightVal;
 	}
 	
+	/**
+	 * Get right sample provider for left light sensor.
+	 * 
+	 * @return right light sensor sample provider
+	 */
 	public SampleProvider getSampleRight() {
 		return rightLightVal;
 	}
 	
+	/**
+	 * Get odometer object being used by navigation class
+	 * 
+	 * @return odometer object
+	 */
 	public Odometer getOdo() {
 		return this.odo;
 	}
