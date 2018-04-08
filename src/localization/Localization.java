@@ -22,6 +22,11 @@ public class Localization implements Task{
     private int corner;
     private volatile boolean _stop = false;
     
+    /*
+     * Constants D and K used for localization.
+     * D determines the distance at which the robot looks for a wall.
+     * K defines a range D-K to D+K which is used to handle innaccuracy in measurements.
+     */
     private static double D;
     private static double K;
     
