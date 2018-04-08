@@ -63,6 +63,9 @@ public class InitTask implements Task {
 
     private Map data;
     
+
+    public int team;
+    
     /**
      * InitTask constructor
      * 
@@ -113,7 +116,7 @@ public class InitTask implements Task {
      */
     private int getTeamColor(Map data){
       // TODO: This throws a error when green team is not given
-      int team = ((long)data.get("GreenTeam") == Params.TEAM_ID) ? 
+      team = ((long)data.get("GreenTeam") == Params.TEAM_ID) ? 
                      TaskManager.TEAM_GREEN : TaskManager.TEAM_RED;
       return team;
     }
@@ -147,9 +150,15 @@ public class InitTask implements Task {
         
         CrossBridgeTask crossBridge = new CrossBridgeTask(nav);
         CrossTunnelTask crossTunnel = new CrossTunnelTask(nav, sp);
-        final Search search = new Search(color.getColorSensor(), nav.getOdo(), nav, nav.getLeftMotor(),
+        final Search search = (getTeamColor(data) == TaskManager.TEAM_GREEN) ? new Search(color.getColorSensor(), nav.getOdo(), nav, nav.getLeftMotor(),
         		nav.getRightMotor(), nav.getSampleLeft(), nav.getSampleRight(), color, 2, (int)((long)data.get("SR_LL_x")),
-        				(int)((long)data.get("SR_LL_y")), (int)((long)data.get("SR_UR_x")), (int)((long)data.get("SR_UR_y")));
+        				(int)((long)data.get("SR_LL_y")), (int)((long)data.get("SR_UR_x")), (int)((long)data.get("SR_UR_y"))) : 
+        					new Search(color.getColorSensor(), nav.getOdo(), nav, nav.getLeftMotor(),
+        			        		nav.getRightMotor(), nav.getSampleLeft(), nav.getSampleRight(), color, 2, (int)((long)data.get("SG_LL_x")),
+        			        				(int)((long)data.get("SG_LL_y")), (int)((long)data.get("SG_UR_x")), (int)((long)data.get("SG_UR_y")));
+        
+//        UltrasonicPoller usPoller = null;
+//        usPoller = new UltrasonicPoller(search.getSampleProvider(), search.getData(), search);
         
         
         
