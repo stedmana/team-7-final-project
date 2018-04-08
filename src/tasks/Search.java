@@ -2,22 +2,27 @@ package tasks;
 import navigation.Navigate;
 import odometer.*;
 import lejos.hardware.Sound;
+import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.robotics.SampleProvider;
 import main.Params;
 import ca.mcgill.ecse211.detectColor.*;
 import fsm.Task;
+import lejos.hardware.lcd.TextLCD;
 
-public class Search implements Task {
+
+public class Search extends Thread implements Task {
 	
 	private static double llx;
 	private static double lly;
 	private static double urx;
 	private static double ury;
 	
+	boolean stop;
+	
 	public boolean outOfTime; 
 	
-	private static float[] blocks = new float[8]; //can hold 4 position values	
+	private static double[] blocks = new double[8]; //can hold 4 position values	
 	private static EV3LargeRegulatedMotor leftMotor;
 	private static EV3LargeRegulatedMotor rightMotor;
 	
@@ -26,6 +31,8 @@ public class Search implements Task {
 	
 	private double xDiff;
 	private double yDiff;
+	
+	private int distance;
 	
 	private double senseDiff;
 	
@@ -37,11 +44,15 @@ public class Search implements Task {
 
 	int targetColour;
 	
+	float data[];
+	
 	boolean taskSuccess;
+	 private static final TextLCD lcd = LocalEV3.get().getTextLCD();
+
 	
 	SampleProvider left;
 	SampleProvider right;
-	
+		
 	/**
 	 * Creates the search class, which enables the robot to createa 2-d map of the search area,
 	 * with all blocks included within it
@@ -62,7 +73,8 @@ public class Search implements Task {
 	 * 
 	 * @param col - a colour detection object from the detectColour package
 	 * @param targetColour - a number between 1 and 4, representing the
-	 *  colour of the object (blue = 1, red = 2, yellow = 3, white = 4)
+	 *  colour of the object (red = 1, blue = 2, yellow = 3, white = 4)
+	 *  @param data - holds the readings recorded by the ultrasonic sensor
 	 * */
 	
 	public Search(SampleProvider ultraSonic, Odometer odo, Navigate nav, EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, 
@@ -97,6 +109,10 @@ public class Search implements Task {
 		this.right = right;
 		
 		this.senseDiff = (urx - llx)*Params.TILE_LENGTH;
+		
+		data = new float[ultraSonic.sampleSize()];
+		
+		this.stop = false;
 			
 	}
 	
@@ -106,29 +122,38 @@ public class Search implements Task {
 	 *and then probe for blocks afterwards */
 	public boolean start(boolean prevTaskSuccess) {
 		
+		lcd.clear();
+		
 		taskSuccess = false;
 		double prevOdoValx;
 		double prevOdoValy;
 		
-	float data[] = new float[ultraSonic.sampleSize()];
 	int i = 0;
 		
 		//might be completed by previous task
-		nav.travelTo(llx, lly, 90, true);
+		nav.travelTo(llx, lly, 90, false);
 	
 		//travel along bottom of search area
 		
-		while(odo.getXYT()[0] != urx) {
-			nav.travelTo(urx, lly, 0, true);
-			prevOdoValx = odo.getXYT()[0];
-			double odoDiffx = odo.getXYT()[0] - prevOdoValx;
-			
+		while(odo.getXYT()[0] <= urx*Params.TILE_LENGTH) {
+			nav.travelTo(urx, lly, 0, false);
+//			prevOdoValx = odo.getXYT()[0];
+//			double odoDiffx = odo.getXYT()[0] - prevOdoValx;
+			lcd.clear();
 			ultraSonic.fetchSample(data, 0);
-			if((data[0] <= Params.SEARCH_THRESHOLD) && (odoDiffx >= 7)) {
+			if((data[0] <= Params.SEARCH_THRESHOLD) /*&& (odoDiffx >= 7)*/) {
+				lcd.drawString("" + data[0], 2, 2);
+				
 				Sound.beep();
-				blocks[i] = (float)odo.getXYT()[0]; //stores x coordinate of block
-				blocks[i+1] = data[0] + (float)odo.getXYT()[1]; // stores approximate y coordinate of block
+				blocks[i] = odo.getXYT()[0]; //stores x coordinate of block
+				blocks[i+1] = (double)data[0] + odo.getXYT()[1]; // stores approximate y coordinate of block
 				i += 2;
+				nav.travelTo(blocks[i], blocks[i+1], 0, false);
+//				try {
+//					Thread.sleep(100);
+//				} catch (InterruptedException e) {
+//					e.printStackTrace();
+//				}
 				//hopefully will pause the ultrasonic controller while keeping the motors rolling
 				//so a block will take up two spaces in the array - the first space for the x-Position, second 
 				//for the y-Position
@@ -137,21 +162,24 @@ public class Search implements Task {
 		
 		
 		//travel up from bottom right corner
-		while(odo.getXYT()[1] != ury) {
-			prevOdoValy = odo.getXYT()[1];
-			double odoDiffy = odo.getXYT()[1] - prevOdoValy;
+		while(odo.getXYT()[1] <= ury*Params.TILE_LENGTH) {
+//			prevOdoValy = odo.getXYT()[1];
+//			double odoDiffy = odo.getXYT()[1] - prevOdoValy;
 			
-			nav.travelTo(urx, ury, 270, true);
+			nav.travelTo(urx, ury, 90, false);
 			ultraSonic.fetchSample(data, 0);
-			if((data[0] <= senseDiff) && (odoDiffy >= 7)) {
+			if((data[0] <= senseDiff) /*&& (odoDiffy >= 7)*/) {
 				Sound.beep();
-				blocks[i] = data[0] + (float)odo.getXYT()[0];
-				blocks[i+1] = (float)odo.getXYT()[1];
+				blocks[i] = (double)data[0] + odo.getXYT()[0];
+				blocks[i+1] = odo.getXYT()[1];
 				i += 2;
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
-		}
-		while(leftMotor.isMoving() && rightMotor.isMoving()) {
-			
 		}
 		
 		
@@ -168,6 +196,8 @@ public class Search implements Task {
 	/**
 	 * Drives to each object saved in the 2-d map, in order to identify colour
 	 * @param targetColour - an int corresponding to a blue, red, yellow or white block
+	 * @val - specifies the colour of a detected object (1-Red, 2-Blue, 3-Yellow, 4-White)
+	 * data - holds the 
 	 * */
 	public int probe(int targetColour) { //have color detection running in the background
 		
@@ -178,7 +208,8 @@ public class Search implements Task {
 		
 		for(int i = 0; i < 8; i += 2) {
 			if(blocks[i] == 0 && blocks[i+1] == 0) { //the only way both values will be 0 is if there are no more blocks recorded
-				break; //or return..??
+				val = 0;
+				return val; 
 			} else if(blocks[i] == 0.0f) { //assuming they're in a row, so x is 0; use blocks[i-1] and blocks[i-2]
 				int j = i;
 				int temp = 1; //start at one so no issue with incrementing it after loop
@@ -217,8 +248,29 @@ public class Search implements Task {
 	return val;
 	}
 	
-	public void stop() {
-		//force the program to exit - perhaps use EXIT;
+//	@Override
+//	public void stop() {
+//		//force the program to exit - perhaps use EXIT;
+//		stop = true;
+//	}
+	
+	public SampleProvider getSampleProvider() {
+		return this.ultraSonic;
 	}
+	
+	public float[] getData() {
+		return this.data;
+	}
+	
+//	@Override
+//	public void processUSData(int distance) {
+//		this.distance = distance;
+//
+//	}
+//
+//	@Override
+//	public int readUSDistance() {
+//		return this.distance;
+//	}
 	
 }

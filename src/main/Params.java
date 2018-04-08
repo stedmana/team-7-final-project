@@ -9,7 +9,7 @@ public class Params {
      * that will not change. i.e descriptions about our hardware, regular constants like speed
      * etc. Put units beside each value.
      */
-    final public static String SERVER_IP = "192.168.2.39";
+    final public static String SERVER_IP = "192.168.2.13";
     final public static double TRACK = 10.7; // cm
     final public static double WHEEL_RAD = 1.6; // cm
     final public static double SENSOR_DIST = 4.5; // cm

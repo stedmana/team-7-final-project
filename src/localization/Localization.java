@@ -222,6 +222,10 @@ public class Localization implements Task{
 		
 	}
     
+    public SampleProvider getUsSensor(){
+    	return this.us;
+    }
+    
     
     @Override
     public void stop() {
