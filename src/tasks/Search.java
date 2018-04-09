@@ -146,7 +146,7 @@ public class Search extends Thread implements Task {
 			e1.printStackTrace();
 		}
 		//travel along bottom of search area
-				while(odo.getXYT()[0] <= urx*Params.TILE_LENGTH) {
+				while(odo.getXYT()[0] <= urx*Params.TILE_LENGTH) { //use 'drive THIS distance'
 			(new Thread() {
 				public void run() {
 						nav.travel(urx, lly, 0, false);
