@@ -24,25 +24,32 @@ public class CrossBridgeTask implements Task {
         double[] pos = odo.getXYT();
         
         nav.squareUp();
-        
         nav.goForward(Params.SPEED/2, 2.5*Params.TILE_LENGTH);
+        
         nav.squareUp();
         nav.goForward(Params.SPEED/2, Params.SENSOR_DIST);
+        double theta = Math.round(pos[2]/90) * 90;
+        double eps = Math.ulp(1.0);
         
-        
-        if(pos[2] % 180 == 0) {
-            int sgn = pos[2] == 0 ? 1:-1;
+        /* if theta == 0 or theta == 180*/
+        if(theta%180 == 0) {
+            int sgn = theta <= eps ? 1:-1;
             odo.setXYT(pos[0], 
                        pos[1] + sgn*3.5*Params.TILE_LENGTH, 
-                       pos[2]);
+                       theta);
+            double test[] = odo.getXYT();
+            boolean val = test[0] == theta;
+        /* if theta == 90 or theta == 270 */
         } else {
-            int sgn = pos[2] == 90 ? 1:-1;
-            odo.setXYT(pos[0] + sgn*3.5* Params.TILE_LENGTH, 
-                       pos[1], 
-                       pos[2]);
+            int sgn = Math.abs(theta-90) <= eps ? 1:-1;
+            odo.setXYT(pos[0] + sgn*3.5*Params.TILE_LENGTH, 
+                       pos[1] , 
+                       theta);    
         }
         return true;
     }
+    
+    
 
   @Override
   public void stop() {

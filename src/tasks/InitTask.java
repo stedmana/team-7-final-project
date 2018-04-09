@@ -120,7 +120,7 @@ public class InitTask implements Task {
                                                     (int)((long)data.get("TN_UR_y")));
         
         CrossBridgeTask crossBridge = new CrossBridgeTask(nav);
-        CrossTunnelTask crossTunnel = new CrossTunnelTask(nav, sp);
+        CrossBridgeTask crossTunnel = new CrossBridgeTask(nav);
         
         
         
@@ -143,7 +143,9 @@ public class InitTask implements Task {
 
           @Override
           public boolean start(boolean prevTaskSuccess) {
-            nav.navigateTo(Params.cornerParams[corner][0], Params.cornerParams[corner][1], Params.cornerParams[corner][2]);
+            nav.navigateTo(Params.cornerParams[corner][0]/Params.TILE_LENGTH, 
+                           Params.cornerParams[corner][1]/Params.TILE_LENGTH, 
+                           Params.cornerParams[corner][2]);
             return true;
           }
 

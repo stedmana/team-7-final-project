@@ -39,8 +39,7 @@ public class NavToRecTask implements Task {
                      bridgePosition[1], 
                      bridgePosition[2], 
                      false);
-      nav.squareUp(false);
-      nav.goForward(Params.SPEED/2, Params.SENSOR_DIST + Params.TILE_LENGTH/2);
+      
       odo.setXYT((bridgePosition[0]) * Params.TILE_LENGTH, 
                  (bridgePosition[1]) * Params.TILE_LENGTH, 
                   bridgePosition[2]);

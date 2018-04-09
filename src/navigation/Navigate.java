@@ -224,9 +224,9 @@ public class Navigate {
   	  leftMotor.stop(true);
   	  rightMotor.stop(false);
   	  double remainingDist = (goal - odo.getXYT()[direction]); // dead reckon the remaining amount
-  	  if((remainingDist > 0 && distance > 0) ||
-  	     (remainingDist < 0 && distance < 0)) 
-  		  remainingDist = (Params.TILE_LENGTH)/2 - Params.SENSOR_DIST; 
+  	  if((remainingDist > Params.SENSOR_DIST && distance > 0) ||
+  	     (remainingDist < -Params.SENSOR_DIST && distance < 0)) 
+  		  remainingDist = (Params.TILE_LENGTH)/2; 
   	  else
   		  remainingDist = 0;
   	  goForward(Params.SPEED, remainingDist);
