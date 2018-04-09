@@ -1,10 +1,8 @@
 package tasks;
 import navigation.Navigate;
 import odometer.*;
-import lejos.hardware.Button;
 import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
-import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.robotics.SampleProvider;
 import main.Params;
 import ca.mcgill.ecse211.detectColor.*;
@@ -34,18 +32,9 @@ public class Search extends Thread implements Task {
 	public boolean outOfTime; 
 	
 	private static double[] blocks = new double[80]; //can hold 40 position values	
-	private static EV3LargeRegulatedMotor leftMotor;
-	private static EV3LargeRegulatedMotor rightMotor;
 	
 	private static Navigate nav;
 	SampleProvider ultraSonic;
-	
-	private double xDiff;
-	private double yDiff;
-	
-	private int distance;
-	
-	private double senseDiff;
 	
 	private static Odometer odo;
 	
@@ -61,9 +50,6 @@ public class Search extends Thread implements Task {
 	boolean taskSuccess;
 	private static TextLCD lcd = LocalEV3.get().getTextLCD(Font.getFont(0, 0, Font.SIZE_SMALL));
 
-	
-	SampleProvider left;
-	SampleProvider right;
 	
 	Localization loc;
 		
@@ -84,8 +70,8 @@ public class Search extends Thread implements Task {
 	 * @param urx x position on the grid of the upper right corner of the search area
 	 * @param ury y position on the grid of the upper right corner of the search area
 	 */
-	public Search(SampleProvider ultraSonic, Odometer odo, Navigate nav, Localization loc,/*EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor,*/ 
-			SampleProvider left, SampleProvider right, DetectColor col, int targetColor, double llx, double lly, double urx, double ury) {
+	public Search(SampleProvider ultraSonic, Odometer odo, Navigate nav, Localization loc,  DetectColor col, 
+				  int targetColor, double llx, double lly, double urx, double ury) {
 		
 		
 		this.llx = llx;
@@ -94,15 +80,11 @@ public class Search extends Thread implements Task {
 		this.ury = ury;
 		
 		this.nav = nav;
-		
-		double xDiff = urx - llx;
-		double yDiff = ury - lly;
+
 		
 		this.odo = odo;
 		this.ultraSonic = ultraSonic;
 		this.loc = loc;
-//		this.leftMotor = leftMotor;
-//		this.rightMotor = rightMotor;
 		
 		this.col = col;
 		
@@ -111,11 +93,6 @@ public class Search extends Thread implements Task {
 		outOfTime = false;
 		
 		this.targetColour = targetColor;
-		
-		this.left = left;
-		this.right = right;
-		
-		this.senseDiff = (urx - llx)*Params.TILE_LENGTH;
 		
 		data = new float[ultraSonic.sampleSize()];
 		this.stop = false;		
@@ -201,11 +178,6 @@ public class Search extends Thread implements Task {
 			}
 		}; 
 		while(odo.getXYT()[1] <= ury*Params.TILE_LENGTH) {
-			/*(new Thread() {
-				public void run() {
-						nav.travel(urx, ury, 0, false);
-				}
-			}).start();*/
 			nav2.start();
 			while(true) {
 				while(nav.leftMotor.isMoving() && nav.rightMotor.isMoving()) {
