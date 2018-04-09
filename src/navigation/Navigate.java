@@ -135,6 +135,10 @@ public class Navigate {
 			diffTravelTo(x,y,theta);
 	}
 	
+	public void travel(double x, double y, double theta, boolean diff) {
+		navigate(x, y, theta);
+	}
+	
 	/**
 	 * Navigate to a given coordinate using the hard-coded line sensing method. 
 	 * 
@@ -154,6 +158,21 @@ public class Navigate {
 	    double[] pos = odo.getXYT();
 	    travelForward(y-pos[1], DIR_Y);
 	    travelForward(x-pos[0], DIR_X);
+	    turnTo(theta);
+	}
+	
+	public void navigate(double x, double y, double theta) {
+		// Set our speeds
+	    leftMotor.setSpeed(Params.SPEED);
+	    rightMotor.setSpeed(Params.SPEED);
+	    
+	    //change to cm
+	    x = x*Params.TILE_LENGTH;
+	    y = y*Params.TILE_LENGTH;
+	    
+	    double[] pos = odo.getXYT();
+	    travelF(y-pos[1], DIR_Y);
+	    travelF(x-pos[0], DIR_X);
 	    //turnTo(theta);
 	}
 	
@@ -227,13 +246,11 @@ public class Navigate {
               goForward(100, Params.SENSOR_DIST_L, Params.SENSOR_DIST_R);
               
               odo.setXYT(pos[0], pos[1], pos[2]);
-              rightMotor.forward();
-              leftMotor.forward();
+
           }
       }
   	  
-  	  leftMotor.stop(true);
-  	  rightMotor.stop(true);
+
   	  double remainingDist = (goal - odo.getXYT()[direction]); // dead reckon the remaining amount
   	  if((remainingDist > 0 && distance > 0) ||
   	     (remainingDist < 0 && distance < 0)) 
@@ -241,6 +258,84 @@ public class Navigate {
   	  else
   		  remainingDist = 0;
   	  goForward(Params.SPEED, remainingDist);
+	}
+	
+	public void travelF(double distance, int direction) {
+		double angle = 0;
+	  	  // Turn to the appropriate direction.
+	  	  int sideOffset = distance < 0 ? 180 : 0;
+	  	  if (direction == DIR_X){
+	  	      angle = 90 + sideOffset;
+	  	  } else if (direction == DIR_Y) {
+	  	      angle = sideOffset;
+	  	  } else {
+	  	      return;
+	  	  }
+	  	  turnTo(angle);
+	  	  
+	  	  double[] pos = odo.getXYT();
+	  	  
+	  	  float[] sampleRight = new float[rightLightVal.sampleSize()];
+	  	  float[] sampleLeft = new float[leftLightVal.sampleSize()];
+	  	  
+	  	  double goal = pos[direction] + distance;
+	  	  
+	  	  int closestLineToGoal = (int) (distance < 0 ? Math.ceil((goal - 5)/ Params.TILE_LENGTH) :
+	  	                                         Math.floor((goal + 5)/ Params.TILE_LENGTH));
+	  	  
+	  	  int closestLineToUs = (int) (distance < 0 ? Math.ceil((pos[direction] - 5)/ Params.TILE_LENGTH) :
+	                                             Math.floor((pos[direction] + 5)/ Params.TILE_LENGTH));
+	  	  int numberOfLines = Math.abs(closestLineToGoal - closestLineToUs);
+	  	  int currentLine = 0;
+	  	      
+	  	  leftMotor.forward();
+	  	  rightMotor.forward();
+	  	  while(currentLine < numberOfLines) { //while distance difference is greater than 2cm
+	          
+	          rightLightVal.fetchSample(sampleRight, 0);
+	          leftLightVal.fetchSample(sampleLeft, 0);
+	          
+	          //dynamic theta correction takes place with left and right wheel line detection
+	          //left motor
+	          if(sampleLeft[0] < 0.4 && leftMotor.isMoving()) {
+	            leftMotor.stop(true);
+	          }
+	          //right motor
+	          if(sampleRight[0] < 0.4 && rightMotor.isMoving()) {
+	            rightMotor.stop(true);
+	          }
+	          //resets once line is hit
+	          if(!leftMotor.isMoving() && !rightMotor.isMoving()) {
+	              currentLine++;
+	              
+	              //dynamic theta correction
+	              odo.setTheta(angle);
+	              
+	              // correct the position
+	              pos = odo.getXYT();
+	              if(distance >= 0)
+	                  pos[direction] = ((int)(pos[direction] + 5) / Params.TILE_LENGTH)*Params.TILE_LENGTH;
+	              else
+	                  pos[direction] = ((int)(pos[direction] - 5) / Params.TILE_LENGTH)*Params.TILE_LENGTH;
+	              
+	              //start robot moving again
+	              goForward(100, Params.SENSOR_DIST_L, Params.SENSOR_DIST_R);
+	              
+	              odo.setXYT(pos[0], pos[1], pos[2]);
+//	              rightMotor.forward();
+//	              leftMotor.forward();
+	          }
+	      }
+	  	  
+//	  	  leftMotor.stop(true);
+//	  	  rightMotor.stop(true);
+	  	  double remainingDist = (goal - odo.getXYT()[direction]); // dead reckon the remaining amount
+	  	  if((remainingDist > 0 && distance > 0) ||
+	  	     (remainingDist < 0 && distance < 0)) 
+	  		  remainingDist = (Params.TILE_LENGTH)/2 - Params.SENSOR_DIST; 
+	  	  else
+	  		  remainingDist = 0;
+	  	  goForward(Params.SPEED, remainingDist);
 	}
 	
 	/**

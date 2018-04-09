@@ -139,32 +139,39 @@ public class Search extends Thread implements Task {
 		//might be completed by previous task
 		nav.travelTo(llx, lly, 90, false);
 	
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		//travel along bottom of search area
-		
-		while(odo.getXYT()[0] <= urx*Params.TILE_LENGTH) {
+				while(odo.getXYT()[0] <= urx*Params.TILE_LENGTH) {
 			(new Thread() {
 				public void run() {
-						nav.travelTo(urx, lly, 0, false);
+						nav.travel(urx, lly, 0, false);
 				}
 			}).start(); //nav will run as a thread...
-			while(nav.leftMotor.isMoving() && nav.rightMotor.isMoving()) {
-				loc.us.fetchSample(data, 0);
-				dist = (int)(data[0]*100.0);
-				if((dist <= 30)) {
-					System.out.println("" + dist);
-					Sound.beep();
-					blocks[i] = odo.getXYT()[0]; //stores x coordinate of block
-					blocks[i+1] = dist + odo.getXYT()[1]; // stores approximate y coordinate of block
-					i += 2;
-					try {
-						Thread.sleep(1000);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+			while(true) {
+				while(nav.leftMotor.isMoving() && nav.rightMotor.isMoving()) {
+					loc.us.fetchSample(data, 0);
+					dist = (int)(data[0]*100.0);
+					if((dist <= 30)) {
+						System.out.println("" + dist);
+						Sound.beep();
+						blocks[i] = odo.getXYT()[0]; //stores x coordinate of block
+						blocks[i+1] = dist + odo.getXYT()[1]; // stores approximate y coordinate of block
+						i += 2;
+						try {
+							Thread.sleep(1000);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						//hopefully will pause the ultrasonic controller while keeping the motors rolling
+						//so a block will take up two spaces in the array - the first space for the x-Position, second 
+						//for the y-Position
 					}
-					//hopefully will pause the ultrasonic controller while keeping the motors rolling
-					//so a block will take up two spaces in the array - the first space for the x-Position, second 
-					//for the y-Position
 				}
 			}
 			
@@ -174,23 +181,25 @@ public class Search extends Thread implements Task {
 		while(odo.getXYT()[1] <= ury*Params.TILE_LENGTH) {
 			(new Thread() {
 				public void run() {
-						nav.travelTo(urx, ury, 0, false);
+						nav.travel(urx, ury, 0, false);
 				}
 			}).start();
-			while(nav.leftMotor.isMoving() && nav.rightMotor.isMoving()) {
-				loc.us.fetchSample(data, 0);
-				dist = (int)(data[0]*100.0);
-				System.out.println("" + dist);
-				if((dist <= 30)) {
-					Sound.beep();
-					blocks[i] = dist + odo.getXYT()[0];
-					blocks[i+1] = odo.getXYT()[1];
-					i += 2;
-					try {
-						Thread.sleep(300);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+			while(true) {
+				while(nav.leftMotor.isMoving() && nav.rightMotor.isMoving()) {
+					loc.us.fetchSample(data, 0);
+					dist = (int)(data[0]*100.0);
+					System.out.println("" + dist);
+					if((dist <= 30)) {
+						Sound.beep();
+						blocks[i] = dist + odo.getXYT()[0];
+						blocks[i+1] = odo.getXYT()[1];
+						i += 2;
+						try {
+							Thread.sleep(300);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}
 				}
 			}
