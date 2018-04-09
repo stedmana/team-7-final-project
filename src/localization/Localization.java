@@ -22,6 +22,11 @@ public class Localization implements Task{
     private int corner;
     private volatile boolean _stop = false;
     
+    /*
+     * Constants D and K used for localization.
+     * D determines the distance at which the robot looks for a wall.
+     * K defines a range D-K to D+K which is used to handle innaccuracy in measurements.
+     */
     private static double D;
     private static double K;
     
@@ -52,12 +57,12 @@ public class Localization implements Task{
       	navigate.squareUp();
       	odometer.setTheta(0);
       	Sound.beep();
-      	navigate.goForward(100, Params.SENSOR_DIST);
+      	navigate.goForward(100, Params.SENSOR_DIST_L, Params.SENSOR_DIST_R);
       	navigate.turnTo(90);
       	
       	navigate.squareUp();
       	Sound.beep();
-      	navigate.goForward(100, Params.SENSOR_DIST);
+      	navigate.goForward(100, Params.SENSOR_DIST_L, Params.SENSOR_DIST_R);
       	odometer.setXYT(Params.cornerParams[corner][0], 
       	                Params.cornerParams[corner][1], 
       	                Params.cornerParams[corner][2]);
@@ -65,16 +70,13 @@ public class Localization implements Task{
       	return true;
     }
     
-    //TODO: Does this ever get used? @murray ?
-    private double nearestMultiple(double base, double num) {
-    	return Math.round(num / base) * base;
-    }
     
     /**
-     * Finds the point at which the ultrasonic sensor reads the minimum distance.
      * Used to define constants D and K to be used in ultrasonic localization.
+     * This is accomplished by rotating 360 degrees and finding the distance to the closest wall.
+     * This distance is then used to find the constants. 
      */
-    private void findD() {
+    private void findDK() {
 
 		navigate.spin(150);
 
@@ -97,8 +99,9 @@ public class Localization implements Task{
 			}
 		}
 
+		// experimentally determined calculations.
 		D = minDist * 100 + 9;
-		K = D / 3.5;
+		K = D / 3;
 		
 		odometer.setX(minDist * 100 + 5);
 		odometer.setY(minDist * 100 + 5);
@@ -124,12 +127,13 @@ public class Localization implements Task{
 			e.printStackTrace();
 		}
 
-		findD();
+		// Method to find necessary constants. 
+		findDK();
 
 		navigate.spinLeft(150);
 
+		// Used to keep track of distance range and ensure no false detections. 
 		boolean found = false;
-
 		boolean above = data[0] * 100 > D + K;
 		boolean middle = false;
 
@@ -141,6 +145,7 @@ public class Localization implements Task{
 			
 			if ((above || middle) && distCM < D - K) {
 				// Distance went below the threshold for a falling edge.
+				// Must have previously been above or within the noise interval.
 				found = true;
 				above = false;
 				odoValues[1] = odometer.getXYT()[2];
@@ -157,18 +162,14 @@ public class Localization implements Task{
 			}
 
 			if (found && !middle) {
-				// Distance far from wall.
+				// no measurement was taken for entering the noise interval
+				// so use the final wall angle.
 				odoValues[0] = odoValues[1];
 			}
-			//			String s = data[0] * 100 + "cm";
-			//			
-			//			LocalEV3.get().getTextLCD().clear(6);
-			//			LocalEV3.get().getTextLCD().drawString(s, 0, 6);
 
 			try {
 				Thread.sleep(70);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -206,15 +207,9 @@ public class Localization implements Task{
 			if (found && !middle) {
 				odoValues[2] = odoValues[3];
 			}
-			//			String s = data[0] * 100 + "cm";
-			//			
-			//			LocalEV3.get().getTextLCD().clear(6);
-			//			LocalEV3.get().getTextLCD().drawString(s, 0, 6);
-
 			try {
 				Thread.sleep(70);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

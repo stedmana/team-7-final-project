@@ -268,7 +268,8 @@ public class InitTask implements Task {
               "NAV_TO_TUNNEL", 
               "NAV_TO_HOME", 
               "CROSS_BRIDGE", 
-              "CROSS_TUNNEL", 
+              "CROSS_TUNNEL",
+              "NAV_TO_SEARCH",
               "SEARCH"
              };
          final TextLCD lcd = LocalEV3.get().getTextLCD(Font.getFont(0, 0, Font.SIZE_SMALL));

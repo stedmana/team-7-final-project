@@ -48,6 +48,7 @@ public class TaskManager {
         NAV_TO_HOME, 
         CROSS_BRIDGE, 
         CROSS_TUNNEL, 
+        NAV_TO_SEARCH,
         SEARCH
      };
      
