@@ -6,12 +6,12 @@ import navigation.Navigate;
 import odometer.Odometer;
 import odometer.OdometerExceptions;
 
-public class CrossBridgeTask implements Task {
+public class CrossRecTask implements Task {
   
     Navigate nav = null;
     Odometer odo = null;
     
-    public CrossBridgeTask(Navigate nav){
+    public CrossRecTask(Navigate nav){
         this.nav = nav;
         try {
           odo = Odometer.getOdometer();
@@ -37,15 +37,14 @@ public class CrossBridgeTask implements Task {
             odo.setXYT(pos[0], 
                        pos[1] + sgn*3.5*Params.TILE_LENGTH, 
                        theta);
-            double test[] = odo.getXYT();
-            boolean val = test[0] == theta;
         /* if theta == 90 or theta == 270 */
         } else {
             int sgn = Math.abs(theta-90) <= eps ? 1:-1;
             odo.setXYT(pos[0] + sgn*3.5*Params.TILE_LENGTH, 
-                       pos[1] , 
+                       pos[1], 
                        theta);    
         }
+        
         return true;
     }
     

@@ -98,15 +98,19 @@ public class InitTask implements Task {
     }
     
     private void createTasks(Map data) {
+      
         TaskManager tm = TaskManager.get();
-        String teamCornerKey = getTeamColor(data) == TaskManager.TEAM_RED ? "RedCorner" : "GreenCorner";
+        final int teamColor = getTeamColor(data);
+        final String teamCornerKey = teamColor == TaskManager.TEAM_RED ? "RedCorner" : "GreenCorner";
         
         // Create navigate object
         final Navigate nav = getNavObject();
         
         // Create tasks and put into map
         final int corner = (int)((long)data.get(teamCornerKey));
+
         Localization locTask = getLocalizationTask(nav, corner);
+        
         NavToRecTask navToBridge = new NavToRecTask(nav, 
                                                     (int)((long)data.get("BR_LL_x")), 
                                                     (int)((long)data.get("BR_LL_y")), 
@@ -119,42 +123,75 @@ public class InitTask implements Task {
                                                     (int)((long)data.get("TN_UR_x")), 
                                                     (int)((long)data.get("TN_UR_y")));
         
-        CrossBridgeTask crossBridge = new CrossBridgeTask(nav);
-        CrossBridgeTask crossTunnel = new CrossBridgeTask(nav);
+        CrossRecTask cross = new CrossRecTask(nav);
         
+        String teamPrefix = String.format("S%s_", 
+            teamColor == TaskManager.TEAM_RED ? "R" : "G");
+        final int sLLx = (int)(long)data.get(teamPrefix+"LL_x");
+        final int sLLy = (int)(long)data.get(teamPrefix+"LL_y");
+        final int sURx = (int)(long)data.get(teamPrefix+"UR_x");
+        final int sURy = (int)(long)data.get(teamPrefix+"UR_y");
         
-        
-        taskMap.put(TaskType.LOCALIZE, locTask);
         tm.registerTask(TaskType.LOCALIZE, locTask, 0);
         
-        taskMap.put(TaskType.NAV_TO_BRIDGE, navToBridge);
         tm.registerTask(TaskType.NAV_TO_BRIDGE, navToBridge, 0);
         
-        taskMap.put(TaskType.NAV_TO_TUNNEL, navToTunnel);
         tm.registerTask(TaskType.NAV_TO_TUNNEL, navToTunnel, 0);
         
-        taskMap.put(TaskType.NAV_TO_HOME, null);
-        taskMap.put(TaskType.SEARCH, null);
+        tm.registerTask(TaskType.CROSS_BRIDGE, cross, 0);
         
+        tm.registerTask(TaskType.CROSS_TUNNEL, cross, 0);
         
-        tm.registerTask(TaskType.CROSS_BRIDGE, crossBridge, 0);
-        tm.registerTask(TaskType.CROSS_TUNNEL, crossBridge, 0);
-        tm.registerTask(TaskType.NAV_TO_HOME, new Task() {
-
+        tm.registerTask(TaskType.NAV_TO_SEARCH, new Task() {
           @Override
           public boolean start(boolean prevTaskSuccess) {
-            nav.navigateTo(Params.cornerParams[corner][0]/Params.TILE_LENGTH, 
-                           Params.cornerParams[corner][1]/Params.TILE_LENGTH, 
-                           Params.cornerParams[corner][2]);
-            return true;
+              int dx = sURx-sLLx;
+              int dy = sURy-sLLy;
+              double pos[] = new double[3];
+              if(dx >= dy) {
+                if(corner == 0 || corner == 1) {
+                    pos[0] = sLLx - 0.5;
+                    pos[1] = sLLy - 0.5;
+                    pos[2] = 90;
+                }
+                else {
+                    pos[0] = sURx + 0.5;
+                    pos[1] = sURy + 0.5;
+                    pos[2] = 270;
+                }
+              } else if(dx < dy) {
+                if(corner == 0 || corner == 1) {
+                    pos[0] = sURx + 0.5;
+                    pos[1] = sLLy - 0.5;
+                    pos[2] = 0;
+                }
+                else {
+                    pos[0] = sLLx - 0.5;
+                    pos[1] = sURy + 0.5;
+                    pos[2] = 180;
+                }
+              }
+              nav.navigateTo(pos[0], pos[1], pos[2]);
+              return true;
           }
-
           @Override
-          public void stop() {
-            // TODO Auto-generated method stub
-            
-          }
-          
+          public void stop() {}    
+        }, 0);
+        
+        tm.registerTask(TaskType.NAV_TO_HOME, new Task() {
+            @Override
+            public boolean start(boolean prevTaskSuccess) {
+              nav.navigateTo(Params.cornerParams[corner][0]/Params.TILE_LENGTH, 
+                             Params.cornerParams[corner][1]/Params.TILE_LENGTH, 
+                             Params.cornerParams[corner][2]);
+              return true;
+            }
+    
+            @Override
+            public void stop() {
+              // TODO Auto-generated method stub
+              
+            }
         }, 0);
     }
     
