@@ -5,16 +5,23 @@ import lejos.robotics.SampleProvider;
 import lejos.hardware.lcd.TextLCD;
 import lejos.hardware.ev3.LocalEV3;
 
+/**
+ * Used by Search class to detect the colour of blocks in the search area. Implements Gaussian
+ * distribution method to detect if a block is blue, red, white, yellow. 
+ * 
+ */
 public class DetectColor {
 
-	static EV3ColorSensor cs = new EV3ColorSensor(LocalEV3.get().getPort("S4"));
+	static EV3ColorSensor cs = new EV3ColorSensor(LocalEV3.get().getPort("S1"));
 	private static double[] meanBlue = new double[3];
 	private static double[] meanRed = new double[3];
 	private static double[] meanWhite = new double[3];
 	private static double[] meanYellow = new double[3];
 	private static TextLCD lcd; 
 
-
+	/**
+	 * Constructor of class used to set up all the calibrated values for each colour
+	 */
 	public DetectColor() {
 
 
@@ -38,7 +45,11 @@ public class DetectColor {
 
 
 	}
-
+	/**
+	 * Detects the colour of the block using the EV3 colour sensor and statistical analysis.
+	 * 
+	 * @return integer indicating colour: 1 = blue, 2 = red, 3 = yellow, 4 = white, 0 = nothing
+	 */
 	public int detectC() {
 
 		//blue = 1, red = 2, yellow = 3, white = 4, 0 = nothing
@@ -146,7 +157,7 @@ public class DetectColor {
 				lcd.drawString("< Object Detected >", 0, 5);
 				lcd.drawString("< Blue            >", 0, 6);
 
-				c = 1;
+				c = 2;
 			
 			} else if(!(rSampleDist > rMeanDist + 2*rStandDist) && !(rSampleDist < rMeanDist - 2*rStandDist)) {
 				//its probably red
@@ -156,7 +167,7 @@ public class DetectColor {
 				lcd.drawString("< Object Detected >", 0, 5);
 				lcd.drawString("< Red             >", 0, 6);
 
-				c = 2;
+				c = 1;
 				
 			} else if(!(ySampleDist > yMeanDist + 2*yStandDist) && !(ySampleDist < yMeanDist - 2*yStandDist)) {
 				//its probably yellow
@@ -192,5 +203,12 @@ public class DetectColor {
 		return c;
 
 	}
+	
+	/**
+	 * @return EV3ColorSensor object for possible use
+	 */
+	public EV3ColorSensor getColorSensor() {
+		return this.cs;
+	} 
 
 }

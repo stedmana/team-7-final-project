@@ -37,7 +37,6 @@ public class OdometryCorrection implements Runnable {
   /**
    * Here is where the odometer correction code should be run.
    * 
-   * @throws OdometerExceptions
    */
   // run method (required for Thread)
   public void run() {
