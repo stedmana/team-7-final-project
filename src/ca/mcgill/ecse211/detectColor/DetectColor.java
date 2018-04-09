@@ -17,7 +17,8 @@ public class DetectColor {
 	private static double[] meanRed = new double[3];
 	private static double[] meanWhite = new double[3];
 	private static double[] meanYellow = new double[3];
-	private static TextLCD lcd; 
+	private static TextLCD lcd;
+	private volatile boolean exit = false;
 
 	/**
 	 * Constructor of class used to set up all the calibrated values for each colour
@@ -202,6 +203,10 @@ public class DetectColor {
 		
 		return c;
 
+	}
+	
+	public void stop() {
+		
 	}
 	
 	/**

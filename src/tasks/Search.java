@@ -154,7 +154,7 @@ public class Search extends Thread implements Task {
 			}).start(); //nav will run as a thread...
 			while(true) {
 				while(nav.leftMotor.isMoving() && nav.rightMotor.isMoving()) {
-					loc.us.fetchSample(data, 0);
+					loc.us.fetchSample(data, 0); //should I make this another thread?
 					dist = (int)(data[0]*100.0);
 					if((dist <= 30)) {
 						System.out.println("" + dist);
@@ -195,7 +195,7 @@ public class Search extends Thread implements Task {
 						blocks[i+1] = odo.getXYT()[1];
 						i += 2;
 						try {
-							Thread.sleep(300);
+							Thread.sleep(700);
 						} catch (InterruptedException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -222,6 +222,7 @@ public class Search extends Thread implements Task {
 	 * @param targetColour an int corresponding to a blue, red, yellow or white black
 	 * @return int indicating if the target colour was found: 0 = false, 1 = true.
 	 */
+	@SuppressWarnings("static-access")
 	public boolean probe(int targetColour) { //have color detection running in the background
 		
 		boolean val = false;
@@ -250,17 +251,32 @@ public class Search extends Thread implements Task {
 				nav.travel((double)blocks[i], (double)blocks[i+1], 0, false); //TODO: include offset so robot does not drive into block
 
 			}
-			(new Thread() {
+			Thread c1 = new Thread() {
 				public void run() {
-						colour = col.detectC();
+					try {
+						while(!Thread.currentThread().isInterrupted()) {
+							colour = col.detectC();
+							Thread.sleep(300);
+						}
+					} catch(InterruptedException e) {
+						Thread.currentThread().interrupt();
+					}
 				}
-			}).start();
-			
+			};
+			c1.start();
+			try {
+				c1.sleep(300);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 			if(colour == targetColour) {
 				Sound.beep();
 				Sound.beep();
 				Sound.beep();
 				val = true; //TODO: change to bool
+				return val;
+			} else if(colour == 0) { //end the thread...
+				c1.interrupt();
 			}
 		}
 	return val;
