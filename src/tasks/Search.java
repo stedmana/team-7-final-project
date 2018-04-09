@@ -146,12 +146,21 @@ public class Search extends Thread implements Task {
 			e1.printStackTrace();
 		}
 		//travel along bottom of search area
-				while(odo.getXYT()[0] <= urx*Params.TILE_LENGTH) { //use 'drive THIS distance'
-			(new Thread() {
-				public void run() {
+		
+		Thread nav1 = new Thread() {
+			public void run() {
+				while(!Thread.currentThread().isInterrupted()) {
+					try{
+						Thread.sleep(300);
 						nav.travel(urx, lly, 0, false);
+					} catch(InterruptedException e) {
+						
+					}
 				}
-			}).start(); //nav will run as a thread...
+			}
+		}; 
+				while(odo.getXYT()[0] <= urx*Params.TILE_LENGTH) { //use 'drive THIS distance'
+			nav1.start(); //nav will run as a thread...
 			while(true) {
 				while(nav.leftMotor.isMoving() && nav.rightMotor.isMoving()) {
 					loc.us.fetchSample(data, 0); //should I make this another thread?
@@ -176,14 +185,28 @@ public class Search extends Thread implements Task {
 			}
 			
 		}
+		nav1.interrupt();
 		
 
+		Thread nav2 = new Thread() {
+			public void run() {
+				while(!Thread.currentThread().isInterrupted()) {
+					try{
+						Thread.sleep(300);
+						nav.travel(urx, ury, 0, false);
+					} catch(InterruptedException e) {
+						
+					}
+				}
+			}
+		}; 
 		while(odo.getXYT()[1] <= ury*Params.TILE_LENGTH) {
-			(new Thread() {
+			/*(new Thread() {
 				public void run() {
 						nav.travel(urx, ury, 0, false);
 				}
-			}).start();
+			}).start();*/
+			nav2.start();
 			while(true) {
 				while(nav.leftMotor.isMoving() && nav.rightMotor.isMoving()) {
 					loc.us.fetchSample(data, 0);
@@ -204,6 +227,7 @@ public class Search extends Thread implements Task {
 				}
 			}
 		}
+		nav2.interrupt();
 		
 		
 		boolean val = probe(targetColour);
