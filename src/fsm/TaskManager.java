@@ -80,14 +80,16 @@ public class TaskManager {
              taskMap.put(LOCALIZE, NAV_TO_TUNNEL);
              taskMap.put(NAV_TO_TUNNEL, CROSS_TUNNEL);
              taskMap.put(CROSS_TUNNEL, NAV_TO_SEARCH);
-             taskMap.put(NAV_TO_SEARCH, NAV_TO_BRIDGE);
+             taskMap.put(NAV_TO_SEARCH, SEARCH);
+             taskMap.put(SEARCH, NAV_TO_BRIDGE);
              taskMap.put(NAV_TO_BRIDGE, CROSS_BRIDGE);
              taskMap.put(CROSS_BRIDGE, NAV_TO_HOME);
          }else if(teamID == TEAM_RED) {
              taskMap.put(LOCALIZE, NAV_TO_BRIDGE);
              taskMap.put(NAV_TO_BRIDGE, CROSS_BRIDGE);
              taskMap.put(CROSS_BRIDGE, NAV_TO_SEARCH);
-             taskMap.put(NAV_TO_SEARCH, NAV_TO_TUNNEL);
+             taskMap.put(NAV_TO_SEARCH, SEARCH);
+             taskMap.put(SEARCH, NAV_TO_TUNNEL);
              taskMap.put(NAV_TO_TUNNEL, CROSS_TUNNEL);
              taskMap.put(CROSS_TUNNEL, NAV_TO_HOME);
          }

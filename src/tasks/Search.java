@@ -34,8 +34,6 @@ public class Search implements Task {
 	
 	private static Odometer odo;
 	
-	DetectColor col;
-	
 	int colour;
 	
 	//dumb implementation variables
@@ -72,8 +70,8 @@ public class Search implements Task {
 	 *  colour of the object (blue = 1, red = 2, yellow = 3, white = 4)
 	 * */
 	
-	public Search(SampleProvider ultraSonic, Odometer odo, Navigate nav, double llx, double lly, double urx, double ury,
-			EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, DetectColor col, int targetColour, int cornerNum) {
+	public Search(SampleProvider ultraSonic, Navigate nav, double llx, double lly, double urx, double ury,
+			EV3ColorSensor col, int targetColour, int cornerNum) {
 		
 		
 		this.llx = llx;
@@ -88,22 +86,23 @@ public class Search implements Task {
 		double xDiff = urx - llx;
 		double yDiff = ury - lly;
 		
-		this.odo = odo;
+		try {
+			this.odo = Odometer.getOdometer();
+		} catch (OdometerExceptions e) {
+			
+		}
 		this.ultraSonic = ultraSonic;
 		
-		this.leftMotor = leftMotor;
-		this.rightMotor = rightMotor;
+		this.colSensor = col;
 		
-		this.col = col;
-		
-		//colour sensor from col
-		EV3ColorSensor colSensor = col.getColorSensor();
 		
 		colour = 0;
 		
 		outOfTime = false;
 		
-		this.targetColour = targetColour;
+		//sorting out target colour
+		//implements mapping red: 1->5 ; blue: 2->2 ; yellow: 3->4 ; white: 4->6
+		this.targetColour = targetColour==1 ? 5: targetColour==2 ? 2 : targetColour==3 ? 4 : 6;
 		
 		//defining variables for dumb search
 		scanDistance = (int) (((urx-llx) > (ury-lly)) ? (urx-llx) : (ury - lly));

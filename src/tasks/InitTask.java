@@ -41,6 +41,9 @@ public class InitTask implements Task {
     // Ultrasonic sensor
     EV3UltrasonicSensor usSensor = new EV3UltrasonicSensor(LocalEV3.get().getPort("S2"));
     SampleProvider sp = usSensor.getDistanceMode();
+    
+    //Colour Sensor
+    static EV3ColorSensor cs = new EV3ColorSensor(LocalEV3.get().getPort("S4"));
   
     static WifiConnection conn;
     
@@ -131,6 +134,11 @@ public class InitTask implements Task {
         final int sLLy = (int)(long)data.get(teamPrefix+"LL_y");
         final int sURx = (int)(long)data.get(teamPrefix+"UR_x");
         final int sURy = (int)(long)data.get(teamPrefix+"UR_y");
+        
+        int targetCol = (int)(long)(teamColor == TaskManager.TEAM_RED ? data.get("OR") : data.get("OG"));
+        Search search = new Search(sp, nav, sURy, sURy, sURy, sURy, cs, targetCol, corner);
+        
+        tm.registerTask(TaskType.SEARCH, search, 60000);
         
         tm.registerTask(TaskType.LOCALIZE, locTask, 0);
         
