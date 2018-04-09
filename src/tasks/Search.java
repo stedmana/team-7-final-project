@@ -1,6 +1,7 @@
 package tasks;
 import navigation.Navigate;
 import odometer.*;
+import lejos.hardware.Button;
 import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
@@ -8,7 +9,9 @@ import lejos.robotics.SampleProvider;
 import main.Params;
 import ca.mcgill.ecse211.detectColor.*;
 import fsm.Task;
+import lejos.hardware.lcd.Font;
 import lejos.hardware.lcd.TextLCD;
+import localization.*;
 
 
 /**
@@ -30,7 +33,7 @@ public class Search extends Thread implements Task {
 	
 	public boolean outOfTime; 
 	
-	private static double[] blocks = new double[8]; //can hold 4 position values	
+	private static double[] blocks = new double[80]; //can hold 40 position values	
 	private static EV3LargeRegulatedMotor leftMotor;
 	private static EV3LargeRegulatedMotor rightMotor;
 	
@@ -53,13 +56,16 @@ public class Search extends Thread implements Task {
 	int targetColour;
 	
 	float data[];
+	int dist;
 	
 	boolean taskSuccess;
-	 private static final TextLCD lcd = LocalEV3.get().getTextLCD();
+	private static TextLCD lcd = LocalEV3.get().getTextLCD(Font.getFont(0, 0, Font.SIZE_SMALL));
 
 	
 	SampleProvider left;
 	SampleProvider right;
+	
+	Localization loc;
 		
 
 	
@@ -78,7 +84,7 @@ public class Search extends Thread implements Task {
 	 * @param urx x position on the grid of the upper right corner of the search area
 	 * @param ury y position on the grid of the upper right corner of the search area
 	 */
-	public Search(SampleProvider ultraSonic, Odometer odo, Navigate nav, EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, 
+	public Search(SampleProvider ultraSonic, Odometer odo, Navigate nav, Localization loc,/*EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor,*/ 
 			SampleProvider left, SampleProvider right, DetectColor col, int targetColor, double llx, double lly, double urx, double ury) {
 		
 		
@@ -94,9 +100,9 @@ public class Search extends Thread implements Task {
 		
 		this.odo = odo;
 		this.ultraSonic = ultraSonic;
-		
-		this.leftMotor = leftMotor;
-		this.rightMotor = rightMotor;
+		this.loc = loc;
+//		this.leftMotor = leftMotor;
+//		this.rightMotor = rightMotor;
 		
 		this.col = col;
 		
@@ -104,7 +110,7 @@ public class Search extends Thread implements Task {
 		
 		outOfTime = false;
 		
-		this.targetColour = targetColour;
+		this.targetColour = targetColor;
 		
 		this.left = left;
 		this.right = right;
@@ -112,9 +118,8 @@ public class Search extends Thread implements Task {
 		this.senseDiff = (urx - llx)*Params.TILE_LENGTH;
 		
 		data = new float[ultraSonic.sampleSize()];
-		
-		this.stop = false;
-			
+		this.stop = false;		
+	
 	}
 	
 	
@@ -128,12 +133,8 @@ public class Search extends Thread implements Task {
 	public boolean start(boolean prevTaskSuccess) {
 		
 		lcd.clear();
-		
 		taskSuccess = false;
-		double prevOdoValx;
-		double prevOdoValy;
-		
-	int i = 0;
+		int i = 0;
 		
 		//might be completed by previous task
 		nav.travelTo(llx, lly, 90, false);
@@ -141,55 +142,63 @@ public class Search extends Thread implements Task {
 		//travel along bottom of search area
 		
 		while(odo.getXYT()[0] <= urx*Params.TILE_LENGTH) {
-			nav.travelTo(urx, lly, 0, false);
-//			prevOdoValx = odo.getXYT()[0];
-//			double odoDiffx = odo.getXYT()[0] - prevOdoValx;
-			lcd.clear();
-			ultraSonic.fetchSample(data, 0);
-			if((data[0] <= Params.SEARCH_THRESHOLD) /*&& (odoDiffx >= 7)*/) {
-				lcd.drawString("" + data[0], 2, 2);
-				
-				Sound.beep();
-				blocks[i] = odo.getXYT()[0]; //stores x coordinate of block
-				blocks[i+1] = (double)data[0] + odo.getXYT()[1]; // stores approximate y coordinate of block
-				i += 2;
-				nav.travelTo(blocks[i], blocks[i+1], 0, false);
-//				try {
-//					Thread.sleep(100);
-//				} catch (InterruptedException e) {
-//					e.printStackTrace();
-//				}
-				//hopefully will pause the ultrasonic controller while keeping the motors rolling
-				//so a block will take up two spaces in the array - the first space for the x-Position, second 
-				//for the y-Position
+			(new Thread() {
+				public void run() {
+						nav.travelTo(urx, lly, 0, false);
+				}
+			}).start(); //nav will run as a thread...
+			while(nav.leftMotor.isMoving() && nav.rightMotor.isMoving()) {
+				loc.us.fetchSample(data, 0);
+				dist = (int)(data[0]*100.0);
+				if((dist <= 30)) {
+					System.out.println("" + dist);
+					Sound.beep();
+					blocks[i] = odo.getXYT()[0]; //stores x coordinate of block
+					blocks[i+1] = dist + odo.getXYT()[1]; // stores approximate y coordinate of block
+					i += 2;
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					//hopefully will pause the ultrasonic controller while keeping the motors rolling
+					//so a block will take up two spaces in the array - the first space for the x-Position, second 
+					//for the y-Position
+				}
 			}
+			
 		}
 		
-		
-		//travel up from bottom right corner
+
 		while(odo.getXYT()[1] <= ury*Params.TILE_LENGTH) {
-//			prevOdoValy = odo.getXYT()[1];
-//			double odoDiffy = odo.getXYT()[1] - prevOdoValy;
-			
-			nav.travelTo(urx, ury, 90, false);
-			ultraSonic.fetchSample(data, 0);
-			if((data[0] <= senseDiff) /*&& (odoDiffy >= 7)*/) {
-				Sound.beep();
-				blocks[i] = (double)data[0] + odo.getXYT()[0];
-				blocks[i+1] = odo.getXYT()[1];
-				i += 2;
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+			(new Thread() {
+				public void run() {
+						nav.travelTo(urx, ury, 0, false);
+				}
+			}).start();
+			while(nav.leftMotor.isMoving() && nav.rightMotor.isMoving()) {
+				loc.us.fetchSample(data, 0);
+				dist = (int)(data[0]*100.0);
+				System.out.println("" + dist);
+				if((dist <= 30)) {
+					Sound.beep();
+					blocks[i] = dist + odo.getXYT()[0];
+					blocks[i+1] = odo.getXYT()[1];
+					i += 2;
+					try {
+						Thread.sleep(300);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 			}
 		}
 		
 		
-		int val = probe(targetColour);
-		if(val == 1) {
+		boolean val = probe(targetColour);
+		if(val) {
 			taskSuccess = true;
 		} else {
 			taskSuccess = false;
@@ -204,16 +213,14 @@ public class Search extends Thread implements Task {
 	 * @param targetColour an int corresponding to a blue, red, yellow or white black
 	 * @return int indicating if the target colour was found: 0 = false, 1 = true.
 	 */
-	public int probe(int targetColour) { //have color detection running in the background
+	public boolean probe(int targetColour) { //have color detection running in the background
 		
-		int val = 0;
+		boolean val = false;
 		//0 is false, 1 is true
-		
-		float data[] = new float[ultraSonic.sampleSize()];
-		
+			
 		for(int i = 0; i < 8; i += 2) {
 			if(blocks[i] == 0 && blocks[i+1] == 0) { //the only way both values will be 0 is if there are no more blocks recorded
-				val = 0;
+				val = false;
 				return val; 
 			} else if(blocks[i] == 0.0f) { //assuming they're in a row, so x is 0; use blocks[i-1] and blocks[i-2]
 				int j = i;
@@ -234,20 +241,17 @@ public class Search extends Thread implements Task {
 				nav.travelTo((double)blocks[i], (double)blocks[i+1], 0, false); //TODO: include offset so robot does not drive into block
 
 			}
-				
-			colour = col.detectC();
-			try {
-				Thread.sleep(500); //to allow the colour detection to be accurate
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		
+			(new Thread() {
+				public void run() {
+						colour = col.detectC();
+				}
+			}).start();
+			
 			if(colour == targetColour) {
 				Sound.beep();
 				Sound.beep();
 				Sound.beep();
-				val = 1; //TODO: change to bool
+				val = true; //TODO: change to bool
 			}
 		}
 	return val;

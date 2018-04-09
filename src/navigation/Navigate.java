@@ -78,8 +78,8 @@ public class Navigate {
 	private static final int DIR_X = 0;
     private static final int DIR_Y = 1;
     
-    private EV3LargeRegulatedMotor leftMotor;
-	private EV3LargeRegulatedMotor rightMotor;
+    public EV3LargeRegulatedMotor leftMotor;
+	public EV3LargeRegulatedMotor rightMotor;
 	private double radius;
 	private double track;
 	
@@ -133,8 +133,6 @@ public class Navigate {
 			navigateTo(x,y,theta);
 		else
 			diffTravelTo(x,y,theta);
-		
-		
 	}
 	
 	/**
@@ -156,7 +154,7 @@ public class Navigate {
 	    double[] pos = odo.getXYT();
 	    travelForward(y-pos[1], DIR_Y);
 	    travelForward(x-pos[0], DIR_X);
-	    turnTo(theta);
+	    //turnTo(theta);
 	}
 	
 	/**
@@ -235,7 +233,7 @@ public class Navigate {
       }
   	  
   	  leftMotor.stop(true);
-  	  rightMotor.stop(false);
+  	  rightMotor.stop(true);
   	  double remainingDist = (goal - odo.getXYT()[direction]); // dead reckon the remaining amount
   	  if((remainingDist > 0 && distance > 0) ||
   	     (remainingDist < 0 && distance < 0)) 

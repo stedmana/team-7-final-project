@@ -16,7 +16,7 @@ import odometer.Odometer;
 public class Localization implements Task{
     
   
-    final private SampleProvider us;
+    final public SampleProvider us;
     private Odometer odometer;
     private Navigate navigate;
     private int corner;
