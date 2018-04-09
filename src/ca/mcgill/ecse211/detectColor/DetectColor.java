@@ -38,6 +38,10 @@ public class DetectColor {
 
 
 	}
+	
+	public EV3ColorSensor getColorSensor() {
+		return this.cs;
+	}
 
 	public int detectC() {
 

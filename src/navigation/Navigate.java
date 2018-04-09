@@ -153,7 +153,7 @@ public class Navigate {
 	 * @param distance distance to travel
 	 * @param direction DIR_X or DIR_Y
 	 */
-	private void travelForward(double distance, int direction)
+	public void travelForward(double distance, int direction)
 	{
   	  double angle = 0;
   	  // Turn to the appropriate direction.

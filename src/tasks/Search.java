@@ -3,7 +3,11 @@ import navigation.Navigate;
 import odometer.*;
 import lejos.hardware.Sound;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
+import lejos.hardware.sensor.EV3ColorSensor;
+import lejos.hardware.sensor.SensorMode;
+import lejos.robotics.Color;
 import lejos.robotics.SampleProvider;
+import main.Params;
 import ca.mcgill.ecse211.detectColor.*;
 import fsm.Task;
 
@@ -13,6 +17,8 @@ public class Search implements Task {
 	private static double lly;
 	private static double urx;
 	private static double ury;
+	
+	private static int cornerNum;
 	
 	public boolean outOfTime; 
 	
@@ -31,6 +37,13 @@ public class Search implements Task {
 	DetectColor col;
 	
 	int colour;
+	
+	//dumb implementation variables
+	int scanDistance;
+	double usDepth;
+	int direction;
+	EV3ColorSensor colSensor;
+	private boolean _stop;
 
 	int targetColour;
 	
@@ -60,13 +73,15 @@ public class Search implements Task {
 	 * */
 	
 	public Search(SampleProvider ultraSonic, Odometer odo, Navigate nav, double llx, double lly, double urx, double ury,
-			EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, DetectColor col, int targetColour) {
+			EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, DetectColor col, int targetColour, int cornerNum) {
 		
 		
 		this.llx = llx;
 		this.lly = lly;
 		this.urx = urx;
 		this.ury = ury;
+		
+		this.cornerNum = cornerNum;
 		
 		this.nav = nav;
 		
@@ -81,11 +96,24 @@ public class Search implements Task {
 		
 		this.col = col;
 		
+		//colour sensor from col
+		EV3ColorSensor colSensor = col.getColorSensor();
+		
 		colour = 0;
 		
 		outOfTime = false;
 		
 		this.targetColour = targetColour;
+		
+		//defining variables for dumb search
+		scanDistance = (int) (((urx-llx) > (ury-lly)) ? (urx-llx) : (ury - lly));
+		
+		usDepth = ((urx-llx) > (ury-lly)) ? (ury-lly) : (urx - llx);
+		
+		direction = (int) (((urx-llx) > (ury-lly)) ? 0 : 1);
+		
+		this._stop = false;
+				
 			
 	}
 	
@@ -95,60 +123,38 @@ public class Search implements Task {
 	 *and then probe for blocks afterwards */
 	public boolean start(boolean prevTaskSuccess) {
 		
-		taskSuccess = false;
+		//sample array
+		float[] usSample = new float[this.ultraSonic.sampleSize()];
 		
-	float data[] = new float[ultraSonic.sampleSize()];
-	int i = 0;
 		
-		nav.travelTo(urx, odo.getXYT()[1], true);
-		while(leftMotor.isMoving() && rightMotor.isMoving()) {
-			ultraSonic.fetchSample(data, 0);
-			if(data[0] <= 80) {
-				blocks[i] = (float)odo.getXYT()[0];
-				blocks[i+1] = data[0] + (float)odo.getXYT()[1];
-				i++;
-				//so a block will take up two spaces in the array - the first space for the x-Position, second 
-				//for the y-Position
+		//for every block on that side
+		for(int i = 0; i < scanDistance && !_stop; i++) {
+			
+			//move forward one tile
+			nav.travelForward(Params.TILE_LENGTH, direction);
+			
+			//look with ultrasonic sensor
+			this.ultraSonic.fetchSample(usSample,0);
+			
+			//if there is a block there
+			if(usSample[0] < usDepth*Params.TILE_LENGTH) {
+				if(probe(this.targetColour)) {//beep three times
+					Sound.beep();
+					Sound.beep();
+					Sound.beep();
+					return true;
+				}
+					
 			}
 		}
 		
-		nav.travelTo(odo.getXYT()[0], ury, true);
-		while(leftMotor.isMoving() && rightMotor.isMoving()) {
-			ultraSonic.fetchSample(data, 0);
-			if(data[0] <= 80) { //maybe lower the max distance before disregarding distance
-				blocks[i] = data[0] + (float)odo.getXYT()[0];
-				blocks[i+1] = (float)odo.getXYT()[1];
-				i++;
-			}
-		}
+		//beep SIX TIMES cause you didn't find it
+		Sound.twoBeeps();
+		Sound.twoBeeps();
+		Sound.twoBeeps();
 		
-		nav.travelTo(llx, odo.getXYT()[2], true);
-		while(leftMotor.isMoving() && rightMotor.isMoving()) {
-			ultraSonic.fetchSample(data, 0);
-			if(data[0] <= 80) { //maybe lower the max distance before disregarding distance
-				blocks[i] = (float)odo.getXYT()[0];
-				blocks[i+1] = data[0] + (float)odo.getXYT()[1];
-				i++;
-			}
-		}
 		
-		nav.travelTo(odo.getXYT()[0], lly, true);
-		while(leftMotor.isMoving() && rightMotor.isMoving()) {
-			ultraSonic.fetchSample(data, 0);
-			if(data[0] <= 80) { //maybe lower the max distance before disregarding distance
-				blocks[i] = data[0] + (float)odo.getXYT()[0];
-				blocks[i+1] = (float)odo.getXYT()[1];
-				i += 2;
-			}
-		}
-		
-		int val = probe(targetColour);
-		if(val == 1) {
-			taskSuccess = true;
-		} else {
-			taskSuccess = false;
-		}
-		return taskSuccess;
+		return false;
 	}
 	
 	
@@ -156,44 +162,57 @@ public class Search implements Task {
 	 * Drives to each object saved in the 2-d map, in order to identify colour
 	 * @param targetColour - an int corresponding to a blue, red, yellow or white block
 	 * */
-	public int probe(int targetColour) { //have color detection running in the background
+	public boolean probe(int targetColour) { //have color detection running in the background
 		
-		int val = 0;
-		//0 is false, 1 is true
+		//0-7 : NONE,BLACK,BLUE,GREEN,YELLOW,RED,WHITE,BROWN
+		int output;
+		boolean success = false;
 		
-		float data[] = new float[ultraSonic.sampleSize()];
+		//turn left
+		nav.turnTo(odo.getXYT()[2] - 90);
 		
-		for(int i = 0; i < 8; i += 2) {
-			if(blocks[i] == 0 && blocks[i+1] == 0) { //the only way both values will be 0 is if there are no more blocks recorded
-				break; //or return..??
-			}
-			nav.travelTo((double)blocks[i], (double)blocks[i+1], false);
-			//insert colour detection here!!!
-			while(leftMotor.isMoving() && rightMotor.isMoving()) {
-				ultraSonic.fetchSample(data, 0);
-				if(data[0] <= 15) { //do we have an ultrasonic sensor to detect the block?
-					colour = col.detectC();
-					try {
-						Thread.sleep(500); //to allow the colour detection to be accurate
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				colour = col.detectC();
-				break;
+		//sample collector
+		float[] colSamples = new float[1];
+		
+		//turn on floodlight
+		colSensor.setFloodlight(true);
+		
+		//set to ColorID mode
+		SensorMode colScanner = colSensor.getColorIDMode();
+		
+		int i = 0;
+		
+		for(i = 0; i < 2*usDepth; i++) {
+			
+			nav.goForward(100, Params.TILE_LENGTH/2);
+			
+			output = colSensor.getColorID();
+			
+			//if white red yellow or blue
+			if(output == 2 || output == 4 || output == 5 || output == 6) {
+				//if the block is the target colour
+				if(output == targetColour) {
+					success = true;
 				}
-			} if(colour == targetColour) {
-				Sound.beep();
-				Sound.beep();
-				Sound.beep();
-				val = 1;
+				break;
 			}
+			
 		}
-	return val;
+		
+		//turn around
+		nav.turnTo(odo.getXYT()[2] + 180);
+		
+		//go back
+		nav.goForward(100, i*Params.TILE_LENGTH/2);
+		
+		//turn to face
+		nav.turnTo(odo.getXYT()[2] - 90);
+		
+		return success;
 	}
 	
 	public void stop() {
-		//force the program to exit - perhaps use EXIT;
+		_stop = true;
 	}
 	
 }
