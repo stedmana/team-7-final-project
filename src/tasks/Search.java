@@ -245,9 +245,9 @@ public class Search extends Thread implements Task {
 				while(blocks[(j+1)-2] == 0) {
 					temp++;
 				}
-				nav.travelTo(blocks[(i+1)-(temp*2)], blocks[i+1], 0, false); //should take care of the columns case
+				nav.travel(blocks[(i+1)-(temp*2)], blocks[i+1], 0, false); //should take care of the columns case
 			} else { //tbh the above conditions should never happen...
-				nav.travelTo((double)blocks[i], (double)blocks[i+1], 0, false); //TODO: include offset so robot does not drive into block
+				nav.travel((double)blocks[i], (double)blocks[i+1], 0, false); //TODO: include offset so robot does not drive into block
 
 			}
 			(new Thread() {
