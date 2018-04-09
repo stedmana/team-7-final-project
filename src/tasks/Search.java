@@ -105,9 +105,9 @@ public class Search implements Task {
 		this.targetColour = targetColour==1 ? 5: targetColour==2 ? 2 : targetColour==3 ? 4 : 6;
 		
 		//defining variables for dumb search
-		scanDistance = (int) (((urx-llx) > (ury-lly)) ? (urx-llx) : (ury - lly));
+		scanDistance = (int) (((urx-llx) > (ury-lly)) ? Math.abs(urx-llx) : Math.abs(ury - lly));
 		
-		usDepth = ((urx-llx) > (ury-lly)) ? (ury-lly) : (urx - llx);
+		usDepth = ((urx-llx) > (ury-lly)) ? Math.abs(ury-lly) : Math.abs(urx - llx);
 		
 		direction = (int) (((urx-llx) > (ury-lly)) ? 0 : 1);
 		
