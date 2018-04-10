@@ -31,7 +31,7 @@ public class Search extends Thread implements Task {
 	
 	public boolean outOfTime; 
 	
-	private static double[] blocks = new double[80]; //can hold 40 position values	
+	private static double[] blocks = new double[10]; //can hold 5 position values	
 	
 	private static Navigate nav;
 	SampleProvider ultraSonic;
@@ -207,13 +207,22 @@ public class Search extends Thread implements Task {
 		nav2.interrupt();
 		
 		
-		boolean val = probe(targetColour);
-		if(val) {
-			taskSuccess = true;
-		} else {
-			taskSuccess = false;
-		}
-		return taskSuccess;
+//		int val = probe(targetColour);
+//		if(val != 0) {
+//			taskSuccess = true;
+//		} else {
+//			taskSuccess = false;
+//			Sound.beep();
+//			Sound.beep();
+//			Sound.beep();
+//			Sound.beep();
+//			Sound.beep();
+//			Sound.beep();
+//
+//		}
+//		return taskSuccess;
+		
+		
 	}
 	
 	
@@ -224,34 +233,17 @@ public class Search extends Thread implements Task {
 	 * @return int indicating if the target colour was found: 0 = false, 1 = true.
 	 */
 	@SuppressWarnings("static-access")
-	public boolean probe(int targetColour) { //have color detection running in the background
+	public int probe(int targetColour) { //have color detection running in the background
 		
-		boolean val = false;
+		int val = 0;
 		//0 is false, 1 is true
-			
-		for(int i = 0; i < 8; i += 2) {
-			if(blocks[i] == 0 && blocks[i+1] == 0) { //the only way both values will be 0 is if there are no more blocks recorded
-				val = false;
-				return val; 
-			} else if(blocks[i] == 0.0f) { //assuming they're in a row, so x is 0; use blocks[i-1] and blocks[i-2]
-				int j = i;
-				int temp = 1; //start at one so no issue with incrementing it after loop
-				while(blocks[j+2] == 0) {
-					temp++;
-				}
-				//ends when it finds blocks[i-2] != 0 which is what we want
-				nav.travelTo(blocks[i+(temp*2)], blocks[i+1], 0, false); //should take care of the columns case
-			} else if(blocks[i+1] == 0.0f) { //assuming they're in a column, so y is 0; 
-				int j = i;
-				int temp = 1; //start at one so no issue with incrementing it after loop
-				while(blocks[(j+1)-2] == 0) {
-					temp++;
-				}
-				nav.travel(blocks[(i+1)-(temp*2)], blocks[i+1], 0, false); //should take care of the columns case
-			} else { //tbh the above conditions should never happen...
-				nav.travel((double)blocks[i], (double)blocks[i+1], 0, false); //TODO: include offset so robot does not drive into block
-
+		for(int i = 0; i < blocks.length; i += 2) {
+			if(blocks[i] == 0 && blocks[i+1] == 0) {
+				return val;
+			} else {
+				nav.diagNav(blocks[i], blocks[i+1]);
 			}
+
 			Thread c1 = new Thread() {
 				public void run() {
 					try {
@@ -274,7 +266,8 @@ public class Search extends Thread implements Task {
 				Sound.beep();
 				Sound.beep();
 				Sound.beep();
-				val = true; //TODO: change to bool
+				val = colour;
+				c1.interrupt();
 				return val;
 			} else if(colour == 0) { //end the thread...
 				c1.interrupt();
@@ -282,30 +275,11 @@ public class Search extends Thread implements Task {
 		}
 	return val;
 	}
-	
-//	@Override
-//	public void stop() {
-//		//force the program to exit - perhaps use EXIT;
-//		stop = true;
-//	}
-	
-	public SampleProvider getSampleProvider() {
-		return this.ultraSonic;
-	}
-	
+
+
 	public float[] getData() {
 		return this.data;
 	}
-	
-//	@Override
-//	public void processUSData(int distance) {
-//		this.distance = distance;
-//
-//	}
-//
-//	@Override
-//	public int readUSDistance() {
-//		return this.distance;
-//	}
+
 	
 }

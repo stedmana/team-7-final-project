@@ -153,61 +153,51 @@ public class DetectColor {
 			
 			if(!(bSampleDist > bMeanDist + 2*bStandDist) && !(bSampleDist < bMeanDist - 2*bStandDist)) {
 				//its probably blue
-				lcd.clear();
-
-				lcd.drawString("< Object Detected >", 0, 5);
-				lcd.drawString("< Blue            >", 0, 6);
-
+//				lcd.clear();
+//
+//				lcd.drawString("< Object Detected >", 0, 5);
+//				lcd.drawString("< Blue            >", 0, 6);
 				c = 2;
 			
 			} else if(!(rSampleDist > rMeanDist + 2*rStandDist) && !(rSampleDist < rMeanDist - 2*rStandDist)) {
 				//its probably red
-
-				lcd.clear();
-
-				lcd.drawString("< Object Detected >", 0, 5);
-				lcd.drawString("< Red             >", 0, 6);
-
+//				lcd.clear();
+//
+//				lcd.drawString("< Object Detected >", 0, 5);
+//				lcd.drawString("< Red             >", 0, 6);
 				c = 1;
 				
 			} else if(!(ySampleDist > yMeanDist + 2*yStandDist) && !(ySampleDist < yMeanDist - 2*yStandDist)) {
 				//its probably yellow
-
-				lcd.clear();
-
-				lcd.drawString("< Object Detected >", 0, 5);
-				lcd.drawString("< Yellow          >", 0, 6);
-
+//
+//				lcd.clear();
+//
+//				lcd.drawString("< Object Detected >", 0, 5);
+//				lcd.drawString("< Yellow          >", 0, 6);
 				c = 3;
 				
 			} else if(!(wSampleDist > wMeanDist + 2*wStandDist) && !(wSampleDist < wMeanDist - 2*wStandDist)) {
 				//its probably white
-
-				lcd.clear();
-
-				lcd.drawString("< Object Detected >", 0, 5);
-				lcd.drawString("< White           >", 0, 6);
-
+//
+//				lcd.clear();
+//
+//				lcd.drawString("< Object Detected >", 0, 5);
+//				lcd.drawString("< White           >", 0, 6);
 				c = 4;
 				
 			}
 			
 		} else {
 			//no object detected
-
-			lcd.clear();
-
-			lcd.drawString("< No Object Detected >", 0, 5);
-
+//
+//			lcd.clear();
+//
+//			lcd.drawString("< No Object Detected >", 0, 5);
 		}
-		
 		return c;
 
 	}
-	
-	public void stop() {
-		
-	}
+
 	
 	/**
 	 * @return EV3ColorSensor object for possible use
