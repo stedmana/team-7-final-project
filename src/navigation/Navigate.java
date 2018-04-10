@@ -759,6 +759,54 @@ public class Navigate {
 		return this.odo;
 	}
 	
+	public void diagNav(double x, double y) {
+
+		double distance = 0;
+
+		double[] pos = odo.getXYT();
+		distance = Math.sqrt(Math.pow(x * Params.TILE_LENGTH - pos[0], 2) + Math.pow(y * Params.TILE_LENGTH - pos[1], 2));
+
+		double angle = Math.atan2(x * Params.TILE_LENGTH - pos[0], y * Params.TILE_LENGTH - pos[1]) * 180 / Math.PI;
+		angle = (angle < 0) ? 360 + angle : angle;
+
+		if ((angle - pos[2] < 0 ? 360 + angle - pos[2] : angle - pos[2]) > 5) {
+			turn(angle);
+		}
+
+
+		leftMotor.setSpeed(Params.SPEED);
+		rightMotor.setSpeed(Params.SPEED);
+
+		leftMotor.rotate(convertDistance(Params.WHEEL_RAD, distance), true);
+		rightMotor.rotate(convertDistance(Params.WHEEL_RAD, distance), false);
+	}
+	
+	private static int convertDistance(double radius, double distance) {
+		return (int) ((180.0 * distance) / (Math.PI * radius));
+	}
+	
+	private static int convertAngle(double radius, double width, double angle) {
+		return convertDistance(radius, Math.PI * width * angle / 360.0);
+	}
+	
+	public void turn(double theta) {
+
+		double rotation = theta - odo.getXYT()[2];
+		rotation = (rotation < 0) ? 360 + rotation : rotation;
+
+		leftMotor.setSpeed(Params.TURN_SPEED);
+		rightMotor.setSpeed(Params.TURN_SPEED);
+
+		if (rotation < 180) {
+			leftMotor.rotate(convertAngle(radius, track, rotation), true);
+			rightMotor.rotate(-convertAngle(radius, track, rotation), false);
+		} else {
+			leftMotor.rotate(-convertAngle(radius, track, 360 - rotation), true);
+			rightMotor.rotate(convertAngle(radius, track, 360 - rotation), false);
+		}
+
+	}
+	
 	/**
 	 * Stop both motors rotation.
 	 */

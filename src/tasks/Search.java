@@ -74,7 +74,7 @@ public class Search extends Thread implements Task {
 				  int targetColor, double llx, double lly, double urx, double ury) {
 		
 		
-		this.llx = llx;
+		this.llx = llx - 0.5;
 		this.lly = lly;
 		this.urx = urx;
 		this.ury = ury;
@@ -114,7 +114,8 @@ public class Search extends Thread implements Task {
 		int i = 0;
 		
 		//might be completed by previous task
-		nav.travelTo(llx, lly, 90, false);
+		//nav.travelTo(llx, lly, 90, false);
+		nav.diagNav(llx, lly);
 	
 		try {
 			Thread.sleep(500);
@@ -129,27 +130,30 @@ public class Search extends Thread implements Task {
 				while(!Thread.currentThread().isInterrupted()) {
 					try{
 						Thread.sleep(300);
-						nav.travel(urx, lly, 0, false);
+						//nav.travel(urx, lly, 0, false);
+						nav.diagNav(urx, lly);
+						odo.run();
 					} catch(InterruptedException e) {
 						
 					}
 				}
 			}
 		}; 
+				odo.setX(llx*Params.TILE_LENGTH);
+				nav1.start();
 				while(odo.getXYT()[0] <= urx*Params.TILE_LENGTH) { //use 'drive THIS distance'
-			nav1.start(); //nav will run as a thread...
-			while(true) {
-				while(nav.leftMotor.isMoving() && nav.rightMotor.isMoving()) {
+			 //nav will run as a thread...
+			//while(true) {
+				//while(nav.leftMotor.isMoving() && nav.rightMotor.isMoving()) {
 					loc.us.fetchSample(data, 0); //should I make this another thread?
 					dist = (int)(data[0]*100.0);
 					if((dist <= 30)) {
-						System.out.println("" + dist);
 						Sound.beep();
 						blocks[i] = odo.getXYT()[0]; //stores x coordinate of block
 						blocks[i+1] = dist + odo.getXYT()[1]; // stores approximate y coordinate of block
 						i += 2;
 						try {
-							Thread.sleep(1000);
+							Thread.sleep(3000);
 						} catch (InterruptedException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -158,46 +162,47 @@ public class Search extends Thread implements Task {
 						//so a block will take up two spaces in the array - the first space for the x-Position, second 
 						//for the y-Position
 					}
-				}
-			}
+				//}
+			//}
 			
 		}
 		nav1.interrupt();
 		
-
+		odo.setY(lly*Params.TILE_LENGTH);
 		Thread nav2 = new Thread() {
 			public void run() {
 				while(!Thread.currentThread().isInterrupted()) {
 					try{
 						Thread.sleep(300);
-						nav.travel(urx, ury, 0, false);
+						//nav.travel(urx, ury, 0, false);
+						nav.diagNav(urx, ury);
 					} catch(InterruptedException e) {
 						
 					}
 				}
 			}
 		}; 
+		nav2.start();
 		while(odo.getXYT()[1] <= ury*Params.TILE_LENGTH) {
-			nav2.start();
-			while(true) {
-				while(nav.leftMotor.isMoving() && nav.rightMotor.isMoving()) {
+			
+			//while(true) {
+				//while(nav.leftMotor.isMoving() && nav.rightMotor.isMoving()) {
 					loc.us.fetchSample(data, 0);
 					dist = (int)(data[0]*100.0);
-					System.out.println("" + dist);
 					if((dist <= 30)) {
 						Sound.beep();
 						blocks[i] = dist + odo.getXYT()[0];
 						blocks[i+1] = odo.getXYT()[1];
 						i += 2;
 						try {
-							Thread.sleep(700);
+							Thread.sleep(3000);
 						} catch (InterruptedException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 					}
-				}
-			}
+				//}
+			//}
 		}
 		nav2.interrupt();
 		
