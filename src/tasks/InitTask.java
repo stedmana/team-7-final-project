@@ -27,8 +27,14 @@ import main.Params;
 import navigation.Navigate;
 import odometer.Odometer;
 import odometer.OdometerExceptions;
+import ca.mcgill.ecse211.detectColor.*;
 
-
+/**
+ * Task first invoked by the main method in order to set up the sensors
+ * and FSM. Setup includes two light sensors, ultrasonic sensor, wifi connection,
+ * and ordering of tasks based on received server data.
+ *
+ */
 public class InitTask implements Task {
     // Light sensor
     EV3ColorSensor leftColorSensor = 
@@ -37,6 +43,7 @@ public class InitTask implements Task {
         new EV3ColorSensor(LocalEV3.get().getPort("S3"));
     SampleProvider lSampleProv = leftColorSensor.getRedMode();
     SampleProvider rSampleProv = rightColorSensor.getRedMode();
+    DetectColor color = new DetectColor();
   
     // Ultrasonic sensor
     EV3UltrasonicSensor usSensor = new EV3UltrasonicSensor(LocalEV3.get().getPort("S2"));
@@ -56,6 +63,18 @@ public class InitTask implements Task {
 
     private Map data;
     
+    public int team;
+    
+    private static TextLCD lcd;
+    
+    /**
+     * InitTask constructor
+     * 
+     * @param server - server name
+     * @param teamNum - team number
+     * @param debugParams - map of the parameters
+     * @param debug - if debugging is required
+     */
     public InitTask(String server, int teamNum, Map<String, Long> debugParams, boolean debug)
     {
         this.debug = debug;
@@ -90,13 +109,24 @@ public class InitTask implements Task {
         return success;
     }
     
+    /**
+     * Gets the integer corresponding to the assigned team colour
+     * 
+     * @param data - receives the data map of all the parameters
+     * @return 0 if team red, 1 if team green
+     */
     private int getTeamColor(Map data){
       // TODO: This throws a error when green team is not given
-      int team = ((long)data.get("GreenTeam") == Params.TEAM_ID) ? 
+      team = ((long)data.get("GreenTeam") == Params.TEAM_ID) ? 
                      TaskManager.TEAM_GREEN : TaskManager.TEAM_RED;
       return team;
     }
     
+    /**
+     * Sets up the order of tasks based on parameters given by the server
+     * 
+     * @param data - data map of all values given by server
+     */
     private void createTasks(Map data) {
       
         TaskManager tm = TaskManager.get();
@@ -131,6 +161,12 @@ public class InitTask implements Task {
         final int sLLy = (int)(long)data.get(teamPrefix+"LL_y");
         final int sURx = (int)(long)data.get(teamPrefix+"UR_x");
         final int sURy = (int)(long)data.get(teamPrefix+"UR_y");
+        
+        final Search search = (getTeamColor(data) == TaskManager.TEAM_GREEN) ? 
+        		new Search(color.getColorSensor(), nav.getOdo(), nav, locTask, color, (int)(long)data.get("OR"), (int)((long)data.get("SR_LL_x")), 
+        				   (int)((long)data.get("SR_LL_y")), (int)((long)data.get("SR_UR_x")),(int)((long)data.get("SR_UR_y"))) : 
+        		new Search(color.getColorSensor(), nav.getOdo(), nav, locTask, color, (int)(long)data.get("OG"), (int)((long)data.get("SG_LL_x")),
+        			       (int)((long)data.get("SG_LL_y")), (int)((long)data.get("SG_UR_x")), (int)((long)data.get("SG_UR_y")));
         
         tm.registerTask(TaskType.LOCALIZE, locTask, 0);
         
@@ -195,18 +231,31 @@ public class InitTask implements Task {
         }, 0);
     }
     
+    /**
+     * Gets task order from TaskManager class based on team ID.
+     * 
+     * @param teamID - either 0 = red or 1 = green
+     */
     private void initFullTaskOrder(int teamID) {
         TaskManager.get().calculateTaskOrder(teamID);
     }
 
-
+    /**
+     * Initializes a TaskType array for the debug menu
+     * 
+     * @param tasks - list of task types
+     */
     private void debugInit(List<TaskType> tasks) {
         tasks.add(0, TaskType.INIT);
         TaskType taskArray[] = tasks.toArray(new TaskType[] {});
         TaskManager.get().setDebugTaskOrder(taskArray);
     }
     
-
+    /**
+     * Used to interact with debug menu on brick screen using hardware buttons.
+     * 
+     * @return - list of task types
+     */
     private List<TaskType> showDebugMenu() {
         LCD.clear();
         int tasksLength  = TaskType.values().length;
@@ -240,6 +289,13 @@ public class InitTask implements Task {
         return tasks;
     }
     
+    /**
+     * Draws the debug menu to the brick screen.
+     * 
+     * @param optionsOffset - used to draw on screen properly
+     * @param indicatorPosition - position of arrow on list
+     * @param currentTasks - list of tasks available in the debug menu
+     */
     private void drawText(int optionsOffset, int indicatorPosition, List<TaskType> currentTasks) {
          final String[] taskMap = {
               "LOCALIZE", 
@@ -273,6 +329,14 @@ public class InitTask implements Task {
          }
       }
     
+    /**
+     * Gets the map of parameters passed by the server.
+     * 
+     * @return map of given parameters from server
+     * @throws UnknownHostException
+     * @throws IOException
+     * @throws ParseException
+     */
     @SuppressWarnings("rawtypes")
     private Map getParams() throws UnknownHostException, IOException, ParseException
     {
@@ -284,6 +348,11 @@ public class InitTask implements Task {
       return data;
     }
     
+    /**
+     * Gets the navigate object used.
+     * 
+     * @return navigate object
+     */
     @SuppressWarnings("resource")
     private Navigate getNavObject()
     {
@@ -292,6 +361,13 @@ public class InitTask implements Task {
                             lSampleProv, rSampleProv);
     }
     
+    /**
+     * Gets the localization object used.
+     * 
+     * @param n - navigate object
+     * @param corner - corner number started in
+     * @return localization object
+     */
     @SuppressWarnings("resource")
     private Localization getLocalizationTask(Navigate n, int corner)
     {

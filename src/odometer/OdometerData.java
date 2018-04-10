@@ -79,7 +79,6 @@ public class OdometerData {
    * Writes the current position and orientation of the robot onto the odoData array. odoData[0] =
    * x, odoData[1] = y; odoData[2] = theta;
    * 
-   * @param position the array to store the odometer data
    * @return the odometer data.
    */
   public double[] getXYT() {
@@ -111,9 +110,9 @@ public class OdometerData {
    * Adds dx, dy and dtheta to the current values of x, y and theta, respectively. Useful for
    * odometry.
    * 
-   * @param dx
-   * @param dy
-   * @param dtheta
+   * @param dx change in x value
+   * @param dy change in y value
+   * @param dtheta change in theta value
    */
   public void update(double dx, double dy, double dtheta) {
     lock.lock();

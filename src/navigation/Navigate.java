@@ -7,8 +7,16 @@ import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.robotics.SampleProvider;
 import main.Params;
 
+/**
+ * Navigate class is used to move the robot across the playing field
+ * using the cartesian coordinate system defined. It includes methods for 
+ * navigation to new coordinates, odometry correction, and motor data.
+ * 
+ */
 public class Navigate {
     
+	
+	//TODO: is this going to be deleted?
     public class PIController implements Runnable{
         final static int I_MAX = 5;
         final int defaultSpeed;
@@ -70,8 +78,8 @@ public class Navigate {
 	private static final int DIR_X = 0;
     private static final int DIR_Y = 1;
     
-    private EV3LargeRegulatedMotor leftMotor;
-	private EV3LargeRegulatedMotor rightMotor;
+    public EV3LargeRegulatedMotor leftMotor;
+	public EV3LargeRegulatedMotor rightMotor;
 	private double radius;
 	private double track;
 	
@@ -81,12 +89,12 @@ public class Navigate {
 	private SampleProvider rightLightVal;
 	
 	/**
-	 * Navigate class used for navigation
-	 * @param leftMotor
-	 * @param rightMotor
-	 * @param leftLightVal
-	 * @param rightLightVal
-	 * @throws OdometerExceptions
+	 * Navigate object constructor
+	 * 
+	 * @param leftMotor	left motor of robot
+	 * @param rightMotor	right motor of robot
+	 * @param leftLightVal light value from left light sensor
+	 * @param rightLightVal light value from right light sensor
 	 */
 	public Navigate(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor,
 			SampleProvider leftLightVal, SampleProvider rightLightVal){
@@ -108,6 +116,10 @@ public class Navigate {
 	}
 	
 	/**
+	 * Method used to travel to a defined cartesian coordinate in the 
+	 * playing field, and finish there facing a defined heading. Odometry
+	 * correction is built in, and line sensing can be done with either a
+	 * differential or hard-coded method. 
 	 * 
 	 * @param x - cartesian x coordinate of destination
 	 * @param y - cartesian y coordinate of destination
@@ -121,12 +133,14 @@ public class Navigate {
 			navigateTo(x,y,theta);
 		else
 			diffTravelTo(x,y,theta);
-		
-		
+	}
+	
+	public void travel(double x, double y, double theta, boolean diff) {
+		navigate(x, y, theta);
 	}
 	
 	/**
-	 * Navigate to a given coordinate.
+	 * Navigate to a given coordinate using the hard-coded line sensing method. 
 	 * 
 	 * @param x - Navigation coordinate X in cartesian
 	 * @param y - Navigation coordinate Y in cartesian
@@ -147,8 +161,24 @@ public class Navigate {
 	    turnTo(theta);
 	}
 	
+	public void navigate(double x, double y, double theta) {
+		// Set our speeds
+	    leftMotor.setSpeed(Params.SPEED);
+	    rightMotor.setSpeed(Params.SPEED);
+	    
+	    //change to cm
+	    x = x*Params.TILE_LENGTH;
+	    y = y*Params.TILE_LENGTH;
+	    
+	    double[] pos = odo.getXYT();
+	    travelF(y-pos[1], DIR_Y);
+	    travelF(x-pos[0], DIR_X);
+	    //turnTo(theta);
+	}
+	
 	/**
 	 * Travels forward a distance in x or y direction correcting the robot with the lines.
+	 * Used by the navigateTo hard-coded line sensing method.
 	 * 
 	 * @param distance distance to travel
 	 * @param direction DIR_X or DIR_Y
@@ -216,13 +246,11 @@ public class Navigate {
               goForward(100, Params.SENSOR_DIST_L, Params.SENSOR_DIST_R);
               
               odo.setXYT(pos[0], pos[1], pos[2]);
-              rightMotor.forward();
-              leftMotor.forward();
+
           }
       }
   	  
-  	  leftMotor.stop(true);
-  	  rightMotor.stop(false);
+
   	  double remainingDist = (goal - odo.getXYT()[direction]); // dead reckon the remaining amount
   	  if((remainingDist > Params.SENSOR_DIST && distance > 0) ||
   	     (remainingDist < -Params.SENSOR_DIST && distance < 0)) 
@@ -232,16 +260,95 @@ public class Navigate {
   	  goForward(Params.SPEED, remainingDist);
 	}
 	
+	public void travelF(double distance, int direction) {
+		double angle = 0;
+	  	  // Turn to the appropriate direction.
+	  	  int sideOffset = distance < 0 ? 180 : 0;
+	  	  if (direction == DIR_X){
+	  	      angle = 90 + sideOffset;
+	  	  } else if (direction == DIR_Y) {
+	  	      angle = sideOffset;
+	  	  } else {
+	  	      return;
+	  	  }
+	  	  turnTo(angle);
+	  	  
+	  	  double[] pos = odo.getXYT();
+	  	  
+	  	  float[] sampleRight = new float[rightLightVal.sampleSize()];
+	  	  float[] sampleLeft = new float[leftLightVal.sampleSize()];
+	  	  
+	  	  double goal = pos[direction] + distance;
+	  	  
+	  	  int closestLineToGoal = (int) (distance < 0 ? Math.ceil((goal - 5)/ Params.TILE_LENGTH) :
+	  	                                         Math.floor((goal + 5)/ Params.TILE_LENGTH));
+	  	  
+	  	  int closestLineToUs = (int) (distance < 0 ? Math.ceil((pos[direction] - 5)/ Params.TILE_LENGTH) :
+	                                             Math.floor((pos[direction] + 5)/ Params.TILE_LENGTH));
+	  	  int numberOfLines = Math.abs(closestLineToGoal - closestLineToUs);
+	  	  int currentLine = 0;
+	  	      
+	  	  leftMotor.forward();
+	  	  rightMotor.forward();
+	  	  while(currentLine < numberOfLines) { //while distance difference is greater than 2cm
+	          
+	          rightLightVal.fetchSample(sampleRight, 0);
+	          leftLightVal.fetchSample(sampleLeft, 0);
+	          
+	          //dynamic theta correction takes place with left and right wheel line detection
+	          //left motor
+	          if(sampleLeft[0] < 0.4 && leftMotor.isMoving()) {
+	            leftMotor.stop(true);
+	          }
+	          //right motor
+	          if(sampleRight[0] < 0.4 && rightMotor.isMoving()) {
+	            rightMotor.stop(true);
+	          }
+	          //resets once line is hit
+	          if(!leftMotor.isMoving() && !rightMotor.isMoving()) {
+	              currentLine++;
+	              
+	              //dynamic theta correction
+	              odo.setTheta(angle);
+	              
+	              // correct the position
+	              pos = odo.getXYT();
+	              if(distance >= 0)
+	                  pos[direction] = ((int)(pos[direction] + 5) / Params.TILE_LENGTH)*Params.TILE_LENGTH;
+	              else
+	                  pos[direction] = ((int)(pos[direction] - 5) / Params.TILE_LENGTH)*Params.TILE_LENGTH;
+	              
+	              //start robot moving again
+	              goForward(100, Params.SENSOR_DIST_L, Params.SENSOR_DIST_R);
+	              
+	              odo.setXYT(pos[0], pos[1], pos[2]);
+//	              rightMotor.forward();
+//	              leftMotor.forward();
+	          }
+	      }
+	  	  
+//	  	  leftMotor.stop(true);
+//	  	  rightMotor.stop(true);
+	  	  double remainingDist = (goal - odo.getXYT()[direction]); // dead reckon the remaining amount
+	  	  if((remainingDist > 0 && distance > 0) ||
+	  	     (remainingDist < 0 && distance < 0)) 
+	  		  remainingDist = (Params.TILE_LENGTH)/2 - Params.SENSOR_DIST; 
+	  	  else
+	  		  remainingDist = 0;
+	  	  goForward(Params.SPEED, remainingDist);
+	}
+	
 	/**
 	 * Travels to point given in arguments by referencing odometer value
 	 * Correction occurs along the way using two front mounted light sensors
 	 * Finishes with heading facing corresponding Y direction traversed
 	 * (eg. up = 0 degrees, down = 180 degrees)
 	 * Assuming: on an intersection of two grid lines
+	 * 
 	 * @param x - in cartesian coordinates
 	 * @param y - in cartesian coordinates
-	 * @param pointCorrect - does odometry correction about end point if true, orients facing 0 degrees
-	 * @return
+	 * @param theta - does odometry correction about end point if true, orients facing 0 degrees
+	 * 
 	 */
 	public void diffTravelTo(double x, double y, double theta) {
 		
@@ -414,17 +521,18 @@ public class Navigate {
 	}
 	
 	/**
-	 * Used to get around boolean argument of squareUp(boolean fwd)
-	 * Has no parameters
+	 * Used so a squareUp call with no arguments is defaulted to an
+	 * argument of True, which corresponds to a forward square up.
 	 */
 	public void squareUp() {
 		squareUp(true);
 	}
 	
 	/**
-	 * Allows robot to correct theta by driving forward to nearest black line
-	 * and using it to square the theta to that line
-	 * @param fwd - false = robot drives backward
+	 * Allows robot to correct theta using the nearest black line. The robot drives
+	 * forward until a sensor detects a line, and then stops the sensor's corresponding motor.
+	 * 
+	 * @param fwd - false = robot drives backward, true = robot drives forward
 	 */
 	public void squareUp(boolean fwd)
 	{
@@ -472,8 +580,9 @@ public class Navigate {
 	}
 	
 	/**
-	 * Turns the robot the minimum distance to face the desired theta heading
-	 * @param theta - in degrees
+	 * Turns the robot the minimum distance to face the desired theta heading.
+	 * 
+	 * @param theta - target angle in degrees
 	 */
 	public void turnTo(double theta) {
 
@@ -505,19 +614,31 @@ public class Navigate {
        rightMotor.setSpeed(Params.SPEED);
 	}
 	
+	/**
+	 * Used by localization to check if robot is spinning
+	 * 
+	 * @return true if left motors is spinning
+	 */
 	public boolean leftMotorSpinning()
 	{
 	    return leftMotor.isMoving();
 	}
 	
+	/**
+	 * Used by localization to check if robot is spinning
+	 * 
+	 * @return true if right motors is spinning
+	 */
 	public boolean rightMotorSpinning()
     {
         return rightMotor.isMoving();
     }
 	
 	/**
-	 *  Turns the robot 360 degrees. Useful for localization etc.
-	 *  @param speed - in degrees/sec
+	 *  Makes the robot rotate 360 degrees clockwise.
+	 *  Used in localization procedure.
+	 *  
+	 *  @param speed - in degrees/second
 	 */
 	public void spin(int speed)
 	{
@@ -528,6 +649,12 @@ public class Navigate {
         rightMotor.rotate((int)-rotation, true);
 	}
 	
+	/**
+	 *  Makes the robot rotate 360 degrees counter-clockwise.
+	 *  Used in localization procedure.
+	 *  
+	 *  @param speed - in degrees/second
+	 */
 	public void spinLeft(int speed) {
 		double rotation = (Params.TRACK * 180/ Params.WHEEL_RAD);
         leftMotor.setSpeed(speed);
@@ -537,9 +664,10 @@ public class Navigate {
 	}
 	
 	/**
-     *  Raw part of travel to, robot will travel forward by the given amount.
-     *  @param speed - in degrees/sec
-     *  @param distance - in cm
+     *  Robot will travel forward by the given amount.
+     *  
+     *  @param speed - in degrees/second
+     *  @param distance - in centimeters
      */
 	public void goForward(int speed, double distance)
 	{
@@ -565,10 +693,10 @@ public class Navigate {
 	
 	/**
 	 * Travel with angle correction.
+	 * 
 	 * @param speed - Initial speed to go to the forward motors.
 	 * @param d - The distance to go.
 	 * @param e - The amount of distance to go before starting the controller
-	 * @return 
 	 * @return PIController - a controller object to send the distance parameters to.
 	 */
 	public PIController PITraveller(float speed, double d, double e) {
@@ -584,6 +712,99 @@ public class Navigate {
 	    Thread controlThread = new Thread(controller);
 	    controlThread.start();
 	    return controller;
+	}
+	
+	/**
+	 * Get left motor object
+	 * 
+	 * @return left motor object
+	 */
+	public EV3LargeRegulatedMotor getLeftMotor() {
+		return this.leftMotor;
+	}
+	
+	/**
+	 * Get right motor object
+	 * 
+	 * @return right motor object
+	 */
+	public EV3LargeRegulatedMotor getRightMotor() {
+		return this.rightMotor;
+	}
+	
+	/**
+	 * Get left sample provider for left light sensor.
+	 * 
+	 * @return left light sensor sample provider
+	 */
+	public SampleProvider getSampleLeft() {
+		return leftLightVal;
+	}
+	
+	/**
+	 * Get right sample provider for left light sensor.
+	 * 
+	 * @return right light sensor sample provider
+	 */
+	public SampleProvider getSampleRight() {
+		return rightLightVal;
+	}
+	
+	/**
+	 * Get odometer object being used by navigation class
+	 * 
+	 * @return odometer object
+	 */
+	public Odometer getOdo() {
+		return this.odo;
+	}
+	
+	public void diagNav(double x, double y) {
+
+		double distance = 0;
+
+		double[] pos = odo.getXYT();
+		distance = Math.sqrt(Math.pow(x * Params.TILE_LENGTH - pos[0], 2) + Math.pow(y * Params.TILE_LENGTH - pos[1], 2));
+
+		double angle = Math.atan2(x * Params.TILE_LENGTH - pos[0], y * Params.TILE_LENGTH - pos[1]) * 180 / Math.PI;
+		angle = (angle < 0) ? 360 + angle : angle;
+
+		if ((angle - pos[2] < 0 ? 360 + angle - pos[2] : angle - pos[2]) > 5) {
+			turn(angle);
+		}
+
+
+		leftMotor.setSpeed(Params.SPEED);
+		rightMotor.setSpeed(Params.SPEED);
+
+		leftMotor.rotate(convertDistance(Params.WHEEL_RAD, distance), true);
+		rightMotor.rotate(convertDistance(Params.WHEEL_RAD, distance), false);
+	}
+	
+	private static int convertDistance(double radius, double distance) {
+		return (int) ((180.0 * distance) / (Math.PI * radius));
+	}
+	
+	private static int convertAngle(double radius, double width, double angle) {
+		return convertDistance(radius, Math.PI * width * angle / 360.0);
+	}
+	
+	public void turn(double theta) {
+
+		double rotation = theta - odo.getXYT()[2];
+		rotation = (rotation < 0) ? 360 + rotation : rotation;
+
+		leftMotor.setSpeed(Params.TURN_SPEED);
+		rightMotor.setSpeed(Params.TURN_SPEED);
+
+		if (rotation < 180) {
+			leftMotor.rotate(convertAngle(radius, track, rotation), true);
+			rightMotor.rotate(-convertAngle(radius, track, rotation), false);
+		} else {
+			leftMotor.rotate(-convertAngle(radius, track, 360 - rotation), true);
+			rightMotor.rotate(convertAngle(radius, track, 360 - rotation), false);
+		}
+
 	}
 	
 	/**

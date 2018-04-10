@@ -6,6 +6,12 @@ import navigation.Navigate;
 import odometer.Odometer;
 import odometer.OdometerExceptions;
 
+/**
+ * Navigates to any rectangle in the playing field defined by two points.
+ * This includes the search area, the bridge, and the tunnel. The class
+ * will navigate to the relative bottom of the rectangle. 
+ *
+ */
 public class NavToRecTask implements Task {
   
   private int URY;
@@ -23,7 +29,13 @@ public class NavToRecTask implements Task {
       
       this.nav = n;
   }
-
+  
+  /**
+   * Starts the navigation to the specified rectangle
+   * 
+   * @param prevTaskSuccess
+   * @return true if successful
+   */
   @Override
   public boolean start(boolean prevTaskSuccess) {
       double currentPos[] = null;
@@ -47,6 +59,12 @@ public class NavToRecTask implements Task {
       
   }
   
+  /**
+   * Used to find the entrance to a tunnel or bridge.
+   * 
+   * @param currentPos - array given by odometer
+   * @return position the robot should be to cross the obstacle
+   */
   public double[] calculateEntrance(double[] currentPos) {
       double bridgePosition[] = new double[3];
     

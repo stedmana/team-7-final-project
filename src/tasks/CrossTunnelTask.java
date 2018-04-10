@@ -7,6 +7,12 @@ import navigation.Navigate;
 import odometer.Odometer;
 import odometer.OdometerExceptions;
 
+/**
+ * Task is invoked after navigating to the start of the tunnel. Includes theta correction, 
+ * driving straight across the tunnel speedbumps, and a final correction on the other side. 
+ *
+ */
+
 public class CrossTunnelTask implements Task {
   
     final static double DISTANCE = 0.057;
