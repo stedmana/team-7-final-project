@@ -43,7 +43,7 @@ public class InitTask implements Task {
     SampleProvider sp = usSensor.getDistanceMode();
     
     //Colour Sensor
-    static EV3ColorSensor cs = new EV3ColorSensor(LocalEV3.get().getPort("S4"));
+    static EV3ColorSensor cs = new EV3ColorSensor(LocalEV3.get().getPort("S1"));
   
     static WifiConnection conn;
     
