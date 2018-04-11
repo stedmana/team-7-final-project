@@ -125,9 +125,9 @@ public class Search implements Task {
 		//sample array
 		float[] usSample = new float[this.ultraSonic.sampleSize()];
 		
-		
+/* -- Disabled actual Search --
 		//for every block on that side
-		for(int i = 0; i < scanDistance && !_stop; i++) {
+		for(int i = 0; i < scanDistance; i++) {
 			
 			//move forward one tile
 			nav.travelForward(Params.TILE_LENGTH, direction);
@@ -146,6 +146,7 @@ public class Search implements Task {
 					
 			}
 		}
+*/
 		
 		//beep SIX TIMES cause you didn't find it
 		Sound.twoBeeps();

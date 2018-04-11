@@ -129,13 +129,13 @@ public class InitTask implements Task {
         CrossRecTask cross = new CrossRecTask(nav);
         
         String teamPrefix = String.format("S%s_", 
-            teamColor == TaskManager.TEAM_RED ? "R" : "G");
+            teamColor == TaskManager.TEAM_RED ? "G" : "R");
         final int sLLx = (int)(long)data.get(teamPrefix+"LL_x");
         final int sLLy = (int)(long)data.get(teamPrefix+"LL_y");
         final int sURx = (int)(long)data.get(teamPrefix+"UR_x");
         final int sURy = (int)(long)data.get(teamPrefix+"UR_y");
         
-        int targetCol = (int)(long)(teamColor == TaskManager.TEAM_RED ? data.get("OR") : data.get("OG"));
+        int targetCol = (int)(long)(teamColor == TaskManager.TEAM_RED ? data.get("OG") : data.get("OR"));
         Search search = new Search(sp, nav, sURy, sURy, sURy, sURy, cs, targetCol, corner);
         
         tm.registerTask(TaskType.SEARCH, search, 60000);

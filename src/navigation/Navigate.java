@@ -173,6 +173,7 @@ public class Navigate {
   	  float[] sampleLeft = new float[leftLightVal.sampleSize()];
   	  
   	  double goal = pos[direction] + distance;
+  	  goal = Math.round(goal/(Params.TILE_LENGTH/2))*(Params.TILE_LENGTH/2);
   	  
   	  int closestLineToGoal = (int) (distance < 0 ? Math.ceil((goal - 5)/ Params.TILE_LENGTH) :
   	                                         Math.floor((goal + 5)/ Params.TILE_LENGTH));

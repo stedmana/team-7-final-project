@@ -18,7 +18,7 @@ public class Params {
      * that will not change. i.e descriptions about our hardware, regular constants like speed
      * etc. Put units beside each value.
      */
-    final public static String SERVER_IP = "192.168.2.35";
+    final public static String SERVER_IP = "192.168.2.3";
     final public static double TRACK = 10.7; // cm
     final public static double WHEEL_RAD = 1.6; // cm
     final public static double SENSOR_DIST_L = 4.5; // cm
@@ -35,12 +35,12 @@ public class Params {
     // Corner location  parameters 
     public final static double cornerParams[][] = {
         {    TILE_LENGTH,     TILE_LENGTH,  90},
-        {7 * TILE_LENGTH,     TILE_LENGTH,  0},
-        {7 * TILE_LENGTH, 7 * TILE_LENGTH, 270},
-        {    TILE_LENGTH, 7 * TILE_LENGTH, 180}
+        {11 * TILE_LENGTH,     TILE_LENGTH,  0},
+        {11 * TILE_LENGTH, 11 * TILE_LENGTH, 270},
+        {    TILE_LENGTH, 11 * TILE_LENGTH, 180}
     };
     
-    final public static int BOARD_SIZE = 8;
+    final public static int BOARD_SIZE = 11;
     
     // Sample set of competition params so we don't have to connect to the server to test all
     // the time.
