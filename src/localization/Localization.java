@@ -9,6 +9,12 @@ import main.Params;
 import navigation.Navigate;
 import odometer.Odometer;
 
+/**
+ * Localization class is used at the beginning of the course to localize the robot's heading
+ * angle and cartesian coordinates to then be forced onto the odometer.
+ * 
+ * @author Murray
+ */
 public class Localization implements Task{
     
   
@@ -18,6 +24,11 @@ public class Localization implements Task{
     private int corner;
     private volatile boolean _stop = false;
     
+    /*
+     * Constants D and K used for localization.
+     * D determines the distance at which the robot looks for a wall.
+     * K defines a range D-K to D+K which is used to handle innaccuracy in measurements.
+     */
     private static double D;
     private static double K;
     
@@ -59,12 +70,13 @@ public class Localization implements Task{
       	System.out.println(odometer.getXYT());
       	return true;
     }
-        
-    private double nearestMultiple(double base, double num) {
-    	return Math.round(num / base) * base;
-    }
     
-    private void findD() {
+    /**
+     * Used to define constants D and K to be used in ultrasonic localization.
+     * This is accomplished by rotating 360 degrees and finding the distance to the closest wall.
+     * This distance is then used to find the constants. 
+     */
+    private void findDK() {
 
 		navigate.spin(150);
 
@@ -94,6 +106,10 @@ public class Localization implements Task{
 		odometer.setY(minDist * 100 + 5);
 	}
     
+    /**
+     * Orients the robot theta heading using the ultrasonic sensor. Rotates in multiple directions and uses the
+     * falling edge method to determine the correct 0 heading. 
+     */
     public void usLocalize() {
 
 		// Store angles at which the walls are seen.
@@ -110,7 +126,7 @@ public class Localization implements Task{
 			e.printStackTrace();
 		}
 
-		findD();
+		findDK();
 
 		navigate.spinLeft(150);
 

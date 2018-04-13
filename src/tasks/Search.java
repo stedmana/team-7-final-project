@@ -8,9 +8,13 @@ import lejos.hardware.sensor.SensorMode;
 import lejos.robotics.Color;
 import lejos.robotics.SampleProvider;
 import main.Params;
-import ca.mcgill.ecse211.detectColor.*;
 import fsm.Task;
 
+/**
+ * Performs search in the given grid utilizing the color sensor and the ultra sonic sensor.
+ * 
+ * @author Greg
+ */
 public class Search implements Task {
 	
 	private static double llx;
@@ -119,13 +123,13 @@ public class Search implements Task {
 	
 	/**
 	 *Enables the robot to travel to each corner of the search area,
-	 *and then probe for blocks afterwards */
+	 *and then probe for blocks afterwards 
+	 **/
 	public boolean start(boolean prevTaskSuccess) {
 		
 		//sample array
 		float[] usSample = new float[this.ultraSonic.sampleSize()];
 		
-/* -- Disabled actual Search --
 		//for every block on that side
 		for(int i = 0; i < scanDistance; i++) {
 			
@@ -146,7 +150,6 @@ public class Search implements Task {
 					
 			}
 		}
-*/
 		
 		//beep SIX TIMES cause you didn't find it
 		Sound.twoBeeps();
@@ -161,6 +164,7 @@ public class Search implements Task {
 	/**
 	 * Drives to each object saved in the 2-d map, in order to identify colour
 	 * @param targetColour - an int corresponding to a blue, red, yellow or white block
+	 * @return true if block is found false otherwise.
 	 * */
 	public boolean probe(int targetColour) { //have color detection running in the background
 		

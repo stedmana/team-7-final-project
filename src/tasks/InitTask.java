@@ -28,7 +28,13 @@ import navigation.Navigate;
 import odometer.Odometer;
 import odometer.OdometerExceptions;
 
-
+/**
+ * Performs all the initialization scheme for the robot in a multi stage process.
+ * Starting with the sensors, then waiting for the wifi input, afterwards, it creates 
+ * subsequent tasks based on the input and deploys them.
+ * 
+ * @author Yasasa
+ */
 public class InitTask implements Task {
     // Light sensor
     EV3ColorSensor leftColorSensor = 

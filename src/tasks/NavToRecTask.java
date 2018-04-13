@@ -6,6 +6,14 @@ import navigation.Navigate;
 import odometer.Odometer;
 import odometer.OdometerExceptions;
 
+/**
+ * Calculates and navigates to a rectangle in the tile grid. The navigation will take it to the
+ * the center of the tile immediately before the closest entrance to the rectangle.
+ * 
+ * Used for tunnel and bridge navigation.
+ * 
+ * @author Yasasa
+ */
 public class NavToRecTask implements Task {
   
   private int URY;

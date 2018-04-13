@@ -6,6 +6,17 @@ import navigation.Navigate;
 import odometer.Odometer;
 import odometer.OdometerExceptions;
 
+/**
+ * This task crosses 2x1 rectangular area on the grid and performs 
+ * odometry correction at the end. Assumption is made that if the previous task
+ * succeeded then we have arrived at the start of the rectangle positioned in the center
+ * of the tile immideatly before.
+ * 
+ * This task will not early exit.
+ * 
+ * @author Yasasa
+ *
+ */
 public class CrossRecTask implements Task {
   
     Navigate nav = null;

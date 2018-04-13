@@ -6,6 +6,10 @@ import lejos.hardware.Sound;
 import lejos.hardware.lcd.LCD;
 import static fsm.TaskManager.TaskType.*;
 
+/**
+ * Data class to hold information about tasks and their runtime statistics.
+ * @author Yasasa
+ */
 class TaskInfo{
     public TaskInfo(Task t, long allotedTime) {
         task = t;
@@ -19,6 +23,13 @@ class TaskInfo{
     public boolean finished;
     public boolean started;
 }
+
+/**
+ * TaskManager is used to dispatch the tasks in a specified order and manage the preemption
+ * details.
+ * 
+ * @author Yasasa
+ */
 
 public class TaskManager {
       /* All our tasks are represented as an enumeration because they are fixed.*/

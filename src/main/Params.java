@@ -13,11 +13,6 @@ import java.util.Map;
  *
  */
 public class Params {
-    /*
-     * This class is to store all the parameters for the robot. Only store things here
-     * that will not change. i.e descriptions about our hardware, regular constants like speed
-     * etc. Put units beside each value.
-     */
     final public static String SERVER_IP = "192.168.2.3";
     final public static double TRACK = 10.7; // cm
     final public static double WHEEL_RAD = 1.6; // cm
