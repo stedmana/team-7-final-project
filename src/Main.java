@@ -5,8 +5,17 @@ import fsm.TaskManager.TaskType;
 import tasks.*;
 import static fsm.TaskManager.TaskType.*;
 import java.util.*;
+
+/**
+ * Main class used to create a thread to kill our program, then start the task manager.
+ */
 public class Main {
   
+  /**
+   * Creates a thread that can be used to kill the robot software with a button press combination.
+   * 
+   * @return A corresponding Thread object
+   */
   public static Thread getKillThread()
   {
     Thread killThread = new Thread(new Runnable() {

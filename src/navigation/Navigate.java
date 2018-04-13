@@ -7,65 +7,15 @@ import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.robotics.SampleProvider;
 import main.Params;
 
+
+/**
+ * Navigate class to provide an interface for movement controls. Abstraction from the motors
+ * and our light sensors such that calling travelTo will allow us to navigate while localizing
+ * at any time.
+ * 
+ * The methods in this object are not thread safe.
+ */
 public class Navigate {
-    
-    public class PIController implements Runnable{
-        final static int I_MAX = 5;
-        final int defaultSpeed;
-        double current_error;
-        double K_p;
-        double K_i;
-        
-        double integrator;
-        
-        double lastTime = 0;
-        
-        boolean _stop = true;
-        public PIController(double K_p, double K_i, int defaultSpeed) {
-            this.current_error = 0;
-            this.integrator = 0;
-            this.defaultSpeed = defaultSpeed;
-        }
-        
-        @Override
-        public void run() {
-            _stop = false;
-            this.lastTime = System.currentTimeMillis();
-            while(!_stop) {
-                if(current_error > 0) {
-                    leftMotor.setSpeed(defaultSpeed+50);
-                    rightMotor.setSpeed(defaultSpeed);
-                } else if (current_error < 0) {
-                    leftMotor.setSpeed(defaultSpeed);
-                    rightMotor.setSpeed(defaultSpeed+50);
-                } else {
-                    leftMotor.setSpeed(defaultSpeed);
-                    leftMotor.setSpeed(defaultSpeed);
-                }
-                if(!(leftMotor.isMoving() && rightMotor.isMoving()))
-                    _stop = true;
-            }
-        }
-        
-        public void stop() {
-            _stop = true;
-        }
-        
-        public void set_error(double error) {
-            this.current_error = error;
-            update_integrator(error, (System.currentTimeMillis() - lastTime)/1000);
-            this.lastTime = System.currentTimeMillis();
-        }
-
-        private void update_integrator(double error, double dt) {
-            if(this.integrator <= I_MAX)
-                this.integrator += dt * error;
-        }
-
-        public boolean isStopped() {
-            return _stop;
-        }
-    }
   
 	private static final int DIR_X = 0;
     private static final int DIR_Y = 1;
@@ -506,18 +456,26 @@ public class Navigate {
        rightMotor.setSpeed(Params.SPEED);
 	}
 	
+	/**
+	 * Interface for the leftMotor.isMoving()
+	 * @return True if the left motor is spinning
+	 */
 	public boolean leftMotorSpinning()
 	{
 	    return leftMotor.isMoving();
 	}
 	
+	/**
+     * Interface for the rightMotor.isMoving()
+     * @return True if the right motor is spinning
+     */
 	public boolean rightMotorSpinning()
     {
         return rightMotor.isMoving();
     }
 	
 	/**
-	 *  Turns the robot 360 degrees. Useful for localization etc.
+	 *  Turns the robot 360 degree in CW direction. Useful for localization etc.
 	 *  @param speed - in degrees/sec
 	 */
 	public void spin(int speed)
@@ -529,6 +487,10 @@ public class Navigate {
         rightMotor.rotate((int)-rotation, true);
 	}
 	
+	/**
+	 * Spins the robot 360 degrees in CCW direction
+	 * @param speed
+	 */
 	public void spinLeft(int speed) {
 		double rotation = (Params.TRACK * 180/ Params.WHEEL_RAD);
         leftMotor.setSpeed(speed);
@@ -553,6 +515,12 @@ public class Navigate {
         rightMotor.setSpeed(Params.SPEED);
 	}
 	
+	/**
+     *  Spin each motor by a certain amount
+     *  @param speed - in degrees/sec
+     *  @param distanceLeft - in cm
+     *  @param distanceRight - in cm
+     */
 	public void goForward(int speed, double distanceLeft, double distanceRight)
     {
         double wheelRotationsCoeff = (180/(Math.PI*Params.WHEEL_RAD));
@@ -563,29 +531,6 @@ public class Navigate {
         leftMotor.setSpeed(Params.SPEED);
         rightMotor.setSpeed(Params.SPEED);
     }
-	
-	/**
-	 * Travel with angle correction.
-	 * @param speed - Initial speed to go to the forward motors.
-	 * @param d - The distance to go.
-	 * @param e - The amount of distance to go before starting the controller
-	 * @return 
-	 * @return PIController - a controller object to send the distance parameters to.
-	 */
-	public PIController PITraveller(float speed, double d, double e) {
-	    
-	    int wheelRotations = (int) ((e*180)/(Math.PI*Params.WHEEL_RAD));
-	    leftMotor.rotate(wheelRotations, true);
-	    rightMotor.rotate(wheelRotations, false);
-	    
-	    wheelRotations = (int) ((d*180)/(Math.PI*Params.WHEEL_RAD));
-	    leftMotor.rotate(wheelRotations, true);
-	    leftMotor.rotate(wheelRotations, true);
-	    PIController controller = new PIController(0.6, 3, (int) speed);
-	    Thread controlThread = new Thread(controller);
-	    controlThread.start();
-	    return controller;
-	}
 	
 	/**
 	 * Stop both motors rotation.

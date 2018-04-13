@@ -28,7 +28,11 @@ import navigation.Navigate;
 import odometer.Odometer;
 import odometer.OdometerExceptions;
 
-
+/**
+ * Performs all the initialization scheme for the robot in a multi-stage process.
+ * Starting with the sensors, then waiting for the WiFi input, afterwards, it creates 
+ * subsequent tasks based on the input and deploys them.
+ */
 public class InitTask implements Task {
     // Light sensor
     EV3ColorSensor leftColorSensor = 
@@ -93,6 +97,11 @@ public class InitTask implements Task {
         return success;
     }
     
+    /**
+     * Returns the information regarding team color from the wifi data.
+     * @param data a Wifi Data map
+     * @return team color, TEAM_GREEN or TEAM_RED.
+     */
     private int getTeamColor(Map data){
       // TODO: This throws a error when green team is not given
       int team = ((long)data.get("GreenTeam") == Params.TEAM_ID) ? 
@@ -100,6 +109,10 @@ public class InitTask implements Task {
       return team;
     }
     
+    /**
+     * Creates the tasks to deploy after wifi data is recieved
+     * @param data Wifi data map.
+     */
     private void createTasks(Map data) {
       
         TaskManager tm = TaskManager.get();
@@ -203,18 +216,29 @@ public class InitTask implements Task {
         }, 0);
     }
     
+    /**
+     * Initializes our task order.
+     * @param teamID TEAM_GREEN or TEAM_RED.
+     */
     private void initFullTaskOrder(int teamID) {
         TaskManager.get().calculateTaskOrder(teamID);
     }
 
-
+    /**
+     * Initializes a debug task order with the task manager.
+     * @param tasks List with the task order to initialize in.
+     */
     private void debugInit(List<TaskType> tasks) {
         tasks.add(0, TaskType.INIT);
         TaskType taskArray[] = tasks.toArray(new TaskType[] {});
         TaskManager.get().setDebugTaskOrder(taskArray);
     }
     
-
+    /**
+     * Draw the debug menu on screen, and get the input from user.
+     * 
+     * @return The list of tasks chosen in from the debug menu
+     */
     private List<TaskType> showDebugMenu() {
         LCD.clear();
         int tasksLength  = TaskType.values().length;
@@ -248,6 +272,12 @@ public class InitTask implements Task {
         return tasks;
     }
     
+    /**
+     * Draw the menu items
+     * @param optionsOffset offset to apply before items are drawn.
+     * @param indicatorPosition position to draw the indicator arrow at.
+     * @param currentTasks list of tasks that are chosen, to draw at the bottom.
+     */
     private void drawText(int optionsOffset, int indicatorPosition, List<TaskType> currentTasks) {
          final String[] taskMap = {
               "LOCALIZE", 
@@ -281,6 +311,14 @@ public class InitTask implements Task {
          }
       }
     
+    /**
+     * Retrieve the wifi data from the server
+     * @return The wifi data map.
+     * 
+     * @throws UnknownHostException
+     * @throws IOException
+     * @throws ParseException
+     */
     @SuppressWarnings("rawtypes")
     private Map getParams() throws UnknownHostException, IOException, ParseException
     {
@@ -292,6 +330,10 @@ public class InitTask implements Task {
       return data;
     }
     
+    /**
+     * Retrieve a new navigate object
+     * @return Returns a navigate object using motors and the light sensors.
+     */
     @SuppressWarnings("resource")
     private Navigate getNavObject()
     {
@@ -300,6 +342,12 @@ public class InitTask implements Task {
                             lSampleProv, rSampleProv);
     }
     
+    /**
+     * Retrieve a new localization object
+     * @param n Navigate object
+     * @param corner the starting corner for our team.
+     * @return Localization object
+     */
     @SuppressWarnings("resource")
     private Localization getLocalizationTask(Navigate n, int corner)
     {

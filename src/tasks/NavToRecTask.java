@@ -6,6 +6,12 @@ import navigation.Navigate;
 import odometer.Odometer;
 import odometer.OdometerExceptions;
 
+/**
+ * Calculates and navigates to a rectangle in the tile grid. The navigation will take it to the
+ * the center of the tile immediately before the closest entrance to the rectangle.
+ * 
+ * Used for tunnel and bridge navigation.
+ */
 public class NavToRecTask implements Task {
   
   private int URY;
@@ -47,6 +53,11 @@ public class NavToRecTask implements Task {
       
   }
   
+  /**
+   * Calculates the closest position to the entrance location.
+   * @param currentPos our current position.
+   * @return an array with tile coordinates of the closes position to the entrance.
+   */
   public double[] calculateEntrance(double[] currentPos) {
       double bridgePosition[] = new double[3];
     
